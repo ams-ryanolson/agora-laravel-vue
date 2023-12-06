@@ -51,3 +51,11 @@ The following is what is required for this to be complete for live
 5. HOST is able to kick someone from audience
 6. HOST is able to remove a message in chat
 7. User is able to select if the stream will be audio only on creation
+
+## Notes
+
+We are trying to replicate Instagram Live with Twitter Spaces. The issue with Twitter spaces is they do not allow group chat which is important for engagement. Instagram Live is not desktop friendly.
+
+Both options also do not allow for the engagement of tips and other services which is something we are trying to put in place for long term engagement.
+
+If you are from Agora, please reach out to talk to me more about this. I am happy to give more details.
