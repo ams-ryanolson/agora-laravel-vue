@@ -37,7 +37,6 @@ class LiveController extends Controller
         $user = auth()->user();
 
         $agoraApi = new AgoraApiService();
-        $mediaGateway = $agoraApi->createMediaGateway($user->id, 'na', config('agora.app_id'));
 
         $live = Live::withTrashed()
             ->where('user_id', $user->id)
@@ -51,7 +50,7 @@ class LiveController extends Controller
         $rtcToken = AgoraTokenService::buildRtcToken($live->uuid, $user->id, 3600);
         $rtmToken = AgoraTokenService::buildRtmToken($user->id, 3600);
 
-        return Inertia::render('Live/Show', [
+        return Inertia::render('Live/Host', [
             'live' => $live,
             'channelId' => $live->uuid,
             'appId' => config('agora.app_id'),
@@ -80,14 +79,14 @@ class LiveController extends Controller
         ];
         $tipsEncoded = json_encode($tipOptions);
 
-        $coverPhoto = $this->storeCoverPhoto($request, $uuid);
+        // $coverPhoto = $this->storeCoverPhoto($request, $uuid);
 
         $userLive = live::create([
             'uuid' => $uuid,
             'user_id' => auth()->user()->id,
             'description' => $request->description,
             'privacy' => $privacy,
-            'cover' => $coverPhoto['optimized'],
+            'cover' => 'https://picsum.photos/seed/' . $uuid . '/200/300',
             'tip_options' => $tipsEncoded,
 
         ]);
@@ -98,11 +97,11 @@ class LiveController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Live $live)
+    public function show($uuid)
     {
         $user = auth()->user();
 
-        $live = Live::where('uuid', $live->uuid)
+        $live = Live::where('uuid', $uuid)
             ->with('user')
             ->firstOrFail();
         

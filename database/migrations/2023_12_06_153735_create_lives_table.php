@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
             $table->string('description');
             $table->string('cover');
-            $table->enum('privacy', ['public', 'followers', 'subscribers'])->default('public');
+            $table->enum('privacy', ['everyone', 'followers', 'subscribers'])->default('public');
             $table->json('tip_options')->nullable();
             $table->timestamps();
             $table->softDeletes();

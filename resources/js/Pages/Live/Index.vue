@@ -10,7 +10,7 @@ const liveStreams = ref(page.props.liveStreams);
 
 <template>
     <div
-        class="w-full flex flex-col pt-2 border-r border-gray-800 gap-2 min-h-screen-app"
+        class="w-full h-screen flex flex-col pt-2 border-r border-gray-800 gap-2 min-h-screen-app bg-gray-900"
     >
         <div
             class="flex justify-between border-b border-gray-700 pb-4 pt-2 px-4"

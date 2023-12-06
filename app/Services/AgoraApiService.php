@@ -13,8 +13,8 @@ class AgoraApiService
     public function __construct()
     {
         $uuid = Uuid::uuid4()->toString();
-        $customerKey = 'a568a8e4828e4ee390d83a9cbe8264dd';
-        $customerSecret = 'df3557d8ce1d40429750202066ca5269';
+        $customerKey = config('agora.customer_key');
+        $customerSecret = config('agora.customer_secret');
 
         $plainCredentials = $customerKey . ':' . $customerSecret;
         $encodedCredentials = base64_encode($plainCredentials);
