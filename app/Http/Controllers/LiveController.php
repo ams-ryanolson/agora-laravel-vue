@@ -10,6 +10,8 @@ use Inertia\Inertia;
 use App\Services\AgoraTokenService;
 use App\Services\AgoraApiService;
 
+use Ramsey\Uuid\Uuid;
+
 class LiveController extends Controller
 {
     /**
@@ -66,7 +68,31 @@ class LiveController extends Controller
      */
     public function store(StoreLiveRequest $request)
     {
-        //
+        $user = auth()->user();
+        $uuid = Uuid::uuid4();
+        $privacy = strtolower($request->privacy);
+        $tipOptions = [
+            ["id" => 1, "name" => "Tip", "price" => 5],
+            ["id" => 2, "name" => "Tip", "price" => 10],
+            ["id" => 3, "name" => "Tip", "price" => 25],
+            ["id" => 4, "name" => "Tip", "price" => 50],
+            ["id" => 5, "name" => "Custom Tip", "price" => "Custom"]
+        ];
+        $tipsEncoded = json_encode($tipOptions);
+
+        $coverPhoto = $this->storeCoverPhoto($request, $uuid);
+
+        $userLive = live::create([
+            'uuid' => $uuid,
+            'user_id' => auth()->user()->id,
+            'description' => $request->description,
+            'privacy' => $privacy,
+            'cover' => $coverPhoto['optimized'],
+            'tip_options' => $tipsEncoded,
+
+        ]);
+
+        return redirect()->route('live.create');
     }
 
     /**
