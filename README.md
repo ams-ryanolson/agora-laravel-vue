@@ -37,3 +37,17 @@ Learn more: https://www.agora.io
 7. Run the database migrations: php artisan migrate
 8. Start the development server: php artisan serve
 9. Visit http://localhost:8000 in your browser to see the application
+
+## Project Requirements
+
+The following is what is required for this to be complete for live
+
+/_ This list is currently incomplete _/
+
+1. User is able to start a stream
+2. User is able to join a stream
+3. HOST is able to invite someone to stage
+4. HOST is able to kick someone off stage
+5. HOST is able to kick someone from audience
+6. HOST is able to remove a message in chat
+7. User is able to select if the stream will be audio only on creation
