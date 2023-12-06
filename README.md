@@ -1,13 +1,10 @@
-/\*\*
+This code snippet demonstrates the usage of Laravel Jetstream, VueJS, InertiaJS, Agora RTM/RTC/Media Gateway.
+It showcases the integration of these technologies to build a real-time communication application.
 
--   This code snippet demonstrates the usage of Laravel Jetstream, VueJS, InertiaJS, Agora RTM/RTC/Media Gateway.
--   It showcases the integration of these technologies to build a real-time communication application.
--
--   @package MyRealTimeApp
--   @version 1.0.0
--   @author [Your Name]
--   @link https://github.com/ams-ryanolson/agora-laravel-vue
-    \*/
+@package agora-laravel-vue
+@version 1.0.0
+@author Ryan Olson
+@link https://github.com/ams-ryanolson/agora-laravel-vue
 
 ## Laravel Jetstream
 
