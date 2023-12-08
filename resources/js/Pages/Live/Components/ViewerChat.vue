@@ -8,12 +8,13 @@ import ChatMessage from "./ChatMessage.vue";
 const props = defineProps(["channelId"]);
 const emit = defineEmits(["channelCount"]);
 
-const appId = config("agora.appId");
-const token = ref(null);
+const page = usePage();
+const appId = "4fb2753a5318441f864b4ddc6118ab06";
+const token = ref(page.props.rtmToken);
 const channelName = props.channelId;
 const messages = ref([]);
 const message = ref("");
-const page = usePage();
+
 const chatMembers = ref([]);
 const occupantList = ref([]);
 const rtmClient = AgoraRTM.createInstance(appId);
@@ -22,6 +23,7 @@ const userData = {
     name: page.props.auth.user.name,
     avatar: page.props.auth.user.profile_photo_path,
 };
+let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
     await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
@@ -38,7 +40,7 @@ onMounted(async () => {
     });
 
     await rtmClient
-        .login({ uid: page.props.auth.user.id, token: token.value })
+        .login({ uid: uid, token: token.value })
         .then(() => {
             // Create the channel instance once
             rtmChannel = rtmClient.createChannel(channelName);

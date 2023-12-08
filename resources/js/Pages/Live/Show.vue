@@ -16,7 +16,7 @@ const client = AgoraRTC.createClient({
 const uid = ref(null);
 const channelId = ref(page.props.channelId);
 const appId = ref(page.props.appId);
-const token = ref(page.props.RtcToken);
+const token = ref(page.props.rtcToken);
 const localTracks = {
     audioTrack: null,
     videoTrack: null,
@@ -60,7 +60,6 @@ const handleUserUnpublished = (user, mediaType) => {
 };
 
 onMounted(async () => {
-    console.log("userLive prop is: " + page.props.channelId);
     await join();
 });
 
