@@ -16,7 +16,7 @@ const client = AgoraRTC.createClient({
 const uid = ref(null);
 const channelId = ref(page.props.channelId);
 const appId = ref(page.props.appId);
-const token = ref(page.props.RtcToken);
+const token = ref(page.props.rtcToken);
 const localTracks = {
     audioTrack: null,
     videoTrack: null,
@@ -27,6 +27,7 @@ const openTipModal = ref(false);
 
 //join as audience
 const join = async () => {
+    alert(appId.value+' channel '+channelId.value+' token '+token.value+ ' id ' + page.props.auth.user.id);
     client.on("user-published", handleUserPublished);
     client.on("user-unpublished", handleUserUnpublished);
     await client.join(
@@ -51,6 +52,7 @@ const subscribe = async (user, mediaType) => {
     }
 };
 const handleUserPublished = (user, mediaType) => {
+    alert('"User Published" event for remote users is triggered');
     console.log('"User Published" event for remote users is triggered');
     subscribe(user, mediaType);
 };

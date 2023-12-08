@@ -136,9 +136,9 @@ const join = async () => {
 const leave = async () => {
     //confirm before leaving
     alert("Are you sure you want to end the live stream?");
-    for (let i = 0; i < localTracks.value.length; i++) {
-        localTracks.value[i].stop();
-    }
+  //  for (let i = 0; i < localTracks.value.length; i++) {
+  //      localTracks.value[i].stop();
+  //  }
     await client.leave();
     isBroadcasting.value = false;
     //redirect to /live
