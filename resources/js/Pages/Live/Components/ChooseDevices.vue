@@ -37,7 +37,7 @@ const closeModal = () => {
         <Dialog as="div" class="relative z-10" @close="closeModal">
             <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
                              leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity"/>
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-5 transition-opacity"/>
             </TransitionChild>
 
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">

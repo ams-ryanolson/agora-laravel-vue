@@ -82,16 +82,21 @@ const messageNavigation = [
 const reverseMessages = computed(() => [...testChatMessages].reverse());
 
 watch(selectedAudioDevice, async () => {
-    await unpublish();
-    await publish();
+    localTracks.value[0].setDevice(selectedAudioDevice._value);
+    //await unpublish();
+    //await publish();
 });
 
 watch(selectedVideoDevice, async () => {
-    await stopLocalTrack();
-    await unpublish();
-    await playLocalTrack();
-    await publish();
+
+    localTracks.value[1].setDevice(selectedVideoDevice._value);
+
+    //await stopLocalTrack();
+    //await unpublish();
+    //await playLocalTrack();
+    //await publish();
 });
+
 const closeChooseDevices = () => {
     openChooseDevices.value = false;
 };
@@ -108,7 +113,7 @@ const getDevices = async () => {
             localAudioDevices.value.push(device);
         }
     });
-    selectedAudioDevice.value = localAudioDevices.value[0].deviceId;
+     selectedAudioDevice.value = localAudioDevices.value[0].deviceId;
     selectedVideoDevice.value = localVideoDevices.value[0].deviceId;
 };
 
@@ -140,8 +145,9 @@ const leave = async () => {
     router.visit("/live");
 };
 
-const publish = async () => {
-    localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
+/*
+
+        localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
         {
             microphoneId: selectedAudioDevice.id,
         },
@@ -149,7 +155,18 @@ const publish = async () => {
             cameraId: selectedVideoDevice.id,
             encoderConfig: "720p_auto",
         }
+*/
+
+const accessDevices  = async () => {
+        localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
+        {
+        },
+        {
+            encoderConfig: "720p_auto",
+        }
     );
+}
+const publish = async () => {
     await client.publish(localTracks.value);
 };
 
@@ -160,7 +177,7 @@ const unpublish = async () => {
 const goLive = async () => {
     await join();
     await publish();
-    await playLocalTrack();
+   // await playLocalTrack();
     isBroadcasting.value = true;
     showPulse.value = true;
 };
@@ -200,8 +217,12 @@ const stopLocalTrack = async () => {
 
 //mounted getDevices
 onMounted(async () => {
+    // access cam and mic
+    await accessDevices();
+    await playLocalTrack();
     await getDevices();
     await console.log("App ID: " + appId.value);
+ 
 });
 </script>
 
@@ -422,7 +443,7 @@ onMounted(async () => {
             >
         </div>
         <div
-            class="w-full h-12 flex flex-row justify-between items-center absolute bottom-0 rounded-b-lg z-40"
+            class="w-full h-12 flex flex-row justify-between items-center absolute bottom-0 rounded-b-lg z-2"
             :class="{
                 'bg-gray-900/80': mobileChatOverlay,
                 'bg-gray-900/50': !mobileChatOverlay,

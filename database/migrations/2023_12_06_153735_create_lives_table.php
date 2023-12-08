@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('description');
             $table->string('cover');
-            $table->enum('privacy', ['everyone', 'followers', 'subscribers'])->default('public');
+            $table->enum('privacy', ['everyone', 'followers', 'subscribers'])->default('everyone');
             $table->json('tip_options')->nullable();
             $table->timestamps();
             $table->softDeletes();

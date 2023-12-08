@@ -8,7 +8,7 @@ import ChatMessage from "./ChatMessage.vue";
 const props = defineProps(["channelId"]);
 const emit = defineEmits(["channelCount"]);
 
-const appId = config("agora.appId");
+const appId = 'e24ca3eb5db7440ea673061316187b06'; //config("agora.appId");
 const token = ref(null);
 const channelName = props.channelId;
 const messages = ref([]);
