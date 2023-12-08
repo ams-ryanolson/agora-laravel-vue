@@ -62,7 +62,6 @@ const handleUserUnpublished = (user, mediaType) => {
 };
 
 onMounted(async () => {
-    console.log("userLive prop is: " + page.props.channelId);
     await join();
 });
 
