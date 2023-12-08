@@ -9,7 +9,7 @@ const props = defineProps(["channelId"]);
 const emit = defineEmits(["channelCount"]);
 
 const page = usePage();
-const appId = "4fb2753a5318441f864b4ddc6118ab06"; // e24ca3eb5db7440ea673061316187b06
+const appId = page.props.appId;
 const token = ref(page.props.rtmToken);
 const channelName = props.channelId;
 const messages = ref([]);
