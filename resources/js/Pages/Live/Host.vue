@@ -20,10 +20,17 @@ const streamLikes = ref(0);
 const channelId = page.props.channelId;
 const statsBar = ref(true);
 const messages = ref([]);
+const rtmChat = ref();
 
-const pushMessage = (message) => {
-    console.log(message);
-    messages.value.push(message);
+const sysMessage = (json,peerId) => {
+    console.error('sysMessage',json.message,peerId);
+    if (json.message=='permissionRequest') {
+        if (confirm('Give broadcast permission to '+peerId+' ?')) {
+            rtmChat.value.$.exposed.sendPermissionResponse(peerId,'OK');
+        } else {
+            rtmChat.value.$.exposed.sendPermissionResponse(peerId,'FAIL');
+        }
+    }
 };
 
 const scrollToBottom = () => {
@@ -357,8 +364,9 @@ const tipList = [
                     <HostChat
                         v-if="rightSidebar === 'chat'"
                         :channelId="channelId"
-                        @channelCount="updateChannelCount"
-                        @newMessage="pushMessage"
+                        @channelCount="updateChannelCount" 
+                        @sysMessage="sysMessage"
+                        ref="rtmChat"                         
                     />
                     <UserList
                         v-if="rightSidebar === 'users'"

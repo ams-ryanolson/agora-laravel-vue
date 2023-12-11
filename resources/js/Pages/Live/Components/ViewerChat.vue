@@ -1,12 +1,12 @@
 <script setup>
 import { PaperAirplaneIcon } from "@heroicons/vue/24/outline";
-import { ref, onBeforeUnmount, onMounted } from "vue";
+import { ref, onBeforeUnmount, onMounted, defineExpose } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "./ChatMessage.vue";
 
 const props = defineProps(["channelId"]);
-const emit = defineEmits(["channelCount"]);
+const emit = defineEmits(["channelCount","sysMessage"]);
 
 const page = usePage();
 const appId = page.props.appId;
@@ -27,7 +27,8 @@ let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
     await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
-        messages.value.push({ text: text, name: peerId });
+        const json = JSON.parse(text);
+        emit("sysMessage",json,peerId);               
     });
 
     await rtmClient.on("ConnectionStateChanged", (newState, reason) => {
@@ -100,6 +101,7 @@ const getChannelCount = async () => {
 };
 
 const sendMessage = () => {
+
     const userMessage = {
         text: message.value,
         userData: userData,
@@ -126,6 +128,26 @@ const sendMessage = () => {
 onBeforeUnmount(() => {
     rtmClient.logout();
 });
+
+const sendPermissionRequest = (peerId) => {
+
+    const systemMessage = {
+        message: 'permissionRequest',
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) },peerId)
+            .then(() => {
+            })
+            .catch((err) => {
+                console.log("AgoraRTM rtmClient sendMessageToPeer failure", err);
+            });
+    }
+};
+
+defineExpose({ sendPermissionRequest });
 </script>
 
 <template>

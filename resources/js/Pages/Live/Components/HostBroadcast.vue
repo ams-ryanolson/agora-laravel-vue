@@ -1,6 +1,6 @@
 <script setup>
 import { router, usePage } from "@inertiajs/vue3";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed,onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
     CogIcon,
@@ -16,6 +16,9 @@ const client = AgoraRTC.createClient({
     codec: "vp9",
     role: "host",
 });
+
+
+
 const localTracks = ref([]);
 const uid = ref(0);
 const appId = ref(page.props.appId);
@@ -97,6 +100,25 @@ watch(selectedVideoDevice, async () => {
     //await publish();
 });
 
+
+const subscribe = async (user, mediaType) => {
+    const uid = user.uid;
+    await client.subscribe(user, mediaType);
+    console.log("subscribe success");
+    if (mediaType === "video") {
+        user.videoTrack.play(`remote-player`);
+    }
+    if (mediaType === "audio") {
+        user.audioTrack.play();
+    }
+};
+const handleUserPublished = (user, mediaType) => {
+    subscribe(user, mediaType);
+};
+
+const handleUserUnpublished = (user, mediaType) => {
+};
+
 const closeChooseDevices = () => {
     openChooseDevices.value = false;
 };
@@ -136,26 +158,13 @@ const join = async () => {
 const leave = async () => {
     //confirm before leaving
     alert("Are you sure you want to end the live stream?");
-  //  for (let i = 0; i < localTracks.value.length; i++) {
-  //      localTracks.value[i].stop();
-  //  }
     await client.leave();
     isBroadcasting.value = false;
     //redirect to /live
     router.visit("/live");
 };
 
-/*
 
-        localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
-        {
-            microphoneId: selectedAudioDevice.id,
-        },
-        {
-            cameraId: selectedVideoDevice.id,
-            encoderConfig: "720p_auto",
-        }
-*/
 
 const accessDevices  = async () => {
         localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
@@ -208,16 +217,22 @@ const unmuteAudio = async () => {
 };
 
 const playLocalTrack = async () => {
-    await localTracks.value[1].play("local-player");
+    await localTracks.value[1].play("remote-player");
 };
 
 const stopLocalTrack = async () => {
     await localTracks.value[1].stop();
 };
+    client.on("user-published", handleUserPublished);
+    client.on("user-unpublished", handleUserUnpublished);
 
-//mounted getDevices
+onBeforeUnmount(() => {
+    leave();
+});
+
 onMounted(async () => {
     // access cam and mic
+
     await accessDevices();
     await playLocalTrack();
     await getDevices();
@@ -225,138 +240,6 @@ onMounted(async () => {
  
 });
 </script>
-
-<!--<script setup>-->
-<!--import {usePage} from '@inertiajs/vue3'-->
-<!--import {onBeforeUnmount, onMounted, ref} from 'vue'-->
-<!--import AgoraRTC from 'agora-rtc-sdk-ng'-->
-<!--import {CogIcon} from "@heroicons/vue/24/outline";-->
-<!--import ChooseDevices from "./ChooseDevices.vue";-->
-
-<!--const page = usePage()-->
-<!--const client = AgoraRTC.createClient({mode: 'live', codec: 'vp9', role: 'host'})-->
-<!--const localTracks = ref([])-->
-<!--const uid = ref(0)-->
-<!--const appId = page.props.appId-->
-<!--const token = ref(page.props.agoraToken)-->
-<!--const channel = page.props.channelId-->
-<!--const isVideoMuted = ref(false)-->
-<!--const isAudioMuted = ref(false)-->
-<!--const isBroadcasting = ref(false)-->
-<!--const showPulse = ref(false)-->
-<!--const localVideoDevices = ref([])-->
-<!--const localAudioDevices = ref([])-->
-<!--const openChooseDevices = ref(false)-->
-<!--const selectedAudioDevice = ref('')-->
-<!--const selectedVideoDevice = ref('')-->
-
-<!--const emit = defineEmits(['endStream'])-->
-
-<!--const join = async () => {-->
-<!--    await client.join(appId.value, page.props.channelId, token.value, page.props.auth.user.id)-->
-<!--    localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks({microphoneId: selectedAudioDevice.id}, {-->
-<!--        cameraId: selectedVideoDevice.id,-->
-<!--        encoderConfig: '720p_auto'-->
-<!--    })-->
-<!--    await client.publish(localTracks.value)-->
-<!--}-->
-
-<!--const leave = async () => {-->
-<!--    //confirm before leaving-->
-<!--    alert('Are you sure you want to end the live stream?')-->
-<!--    for (let i = 0; i < localTracks.value.length; i++) {-->
-<!--        localTracks.value[i].stop()-->
-<!--    }-->
-<!--    await client.leave()-->
-<!--    isBroadcasting.value = false-->
-<!--    emit('endStream')-->
-<!--}-->
-
-<!--const unpublish = async () => {-->
-<!--    await client.unpublish()-->
-<!--}-->
-
-<!--const publish = async () => {-->
-<!--    localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks({microphoneId: selectedAudioDevice.id}, {-->
-<!--        cameraId: selectedVideoDevice.id,-->
-<!--        encoderConfig: '720p_auto'-->
-<!--    })-->
-<!--    await client.publish(localTracks.value)-->
-<!--}-->
-
-<!--const hostLive = async () => {-->
-<!--    await join()-->
-<!--    await playLocalTrack()-->
-<!--    isBroadcasting.value = true-->
-<!--    showPulse.value = true-->
-<!--}-->
-
-<!--const muteVideo = async () => {-->
-<!--    await localTracks.value[1].setEnabled(false)-->
-<!--    isVideoMuted.value = true-->
-<!--}-->
-
-<!--const unmuteVideo = async () => {-->
-<!--    await localTracks.value[1].setEnabled(true)-->
-<!--    isVideoMuted.value = false-->
-<!--}-->
-
-<!--const muteAudio = async () => {-->
-<!--    await localTracks.value[0].setEnabled(false)-->
-<!--    isAudioMuted.value = true-->
-<!--}-->
-
-<!--const unmuteAudio = async () => {-->
-<!--    await localTracks.value[0].setEnabled(true)-->
-<!--    isAudioMuted.value = false-->
-<!--}-->
-
-<!--const playLocalTrack = async () => {-->
-<!--    await localTracks.value[1].play('local-player')-->
-<!--}-->
-
-<!--const getDevices = async () => {-->
-<!--    localVideoDevices.value = []-->
-<!--    localAudioDevices.value = []-->
-<!--    const devices = await AgoraRTC.getDevices();-->
-<!--    devices.forEach((device) => {-->
-<!--        if (device.kind === 'videoinput') {-->
-<!--            localVideoDevices.value.push(device);-->
-<!--        }-->
-<!--        if (device.kind === 'audioinput') {-->
-<!--            localAudioDevices.value.push(device);-->
-<!--        }-->
-<!--    });-->
-<!--    selectedAudioDevice.value = localAudioDevices.value[0].deviceId-->
-<!--    selectedVideoDevice.value = localVideoDevices.value[0].deviceId-->
-<!--};-->
-
-<!--const changeDevices = async () => {-->
-<!--    await unpublish()-->
-<!--    await publish()-->
-<!--    await playLocalTrack()-->
-<!--    openChooseDevices.value = false-->
-<!--}-->
-<!--const closeChooseDevices = () => {-->
-<!--    openChooseDevices.value = false-->
-<!--}-->
-
-<!--const selectMediaDevices = () => {-->
-<!--    if (localAudioDevices.value.length > 1 || localVideoDevices.value.length > 1) {-->
-<!--        openChooseDevices.value = true-->
-<!--    }-->
-<!--}-->
-
-<!--onMounted( async () => {-->
-<!--    await getDevices()-->
-<!--    selectMediaDevices()-->
-<!--})-->
-
-<!--onBeforeUnmount(() => {-->
-<!--    unpublish()-->
-<!--    leave()-->
-<!--})-->
-<!--</script>-->
 
 <template>
     <ChooseDevices
@@ -371,7 +254,7 @@ onMounted(async () => {
     <div
         class="relative w-full h-full bg-gray-800 rounded-lg text-2xl font-bold flex justify-center items-center shadow-md shadow-black"
     >
-        <div class="w-full h-full rounded-lg relative" id="local-player">
+        <div  id="remote-player" style="display:contents;" class="w-full h-full rounded-lg relative">
             <div
                 class="absolute w-full h-[calc(100%-96px)] z-20 flex flex-col-reverse gap-5 no-scrollbar overflow-y-scroll mt-12 px-4 bg-gradient-to-b from-transparent to-gray-900/80 via-gray-900/20"
                 v-show="mobileChatOverlay"

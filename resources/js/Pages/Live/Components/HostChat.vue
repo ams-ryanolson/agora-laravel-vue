@@ -3,13 +3,13 @@ import {
     EllipsisVerticalIcon,
     PaperAirplaneIcon,
 } from "@heroicons/vue/24/outline";
-import { ref, onBeforeUnmount, onMounted, watch } from "vue";
+import { ref, onBeforeUnmount, onMounted,defineExpose, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "./ChatMessage.vue";
 
 const props = defineProps(["channelId"]);
-const emit = defineEmits(["channelCount", "newMessage"]);
+const emit = defineEmits(["channelCount", "sysMessage"]);
 
 const page = usePage();
 const appId = "4fb2753a5318441f864b4ddc6118ab06";
@@ -28,8 +28,10 @@ const userData = {
 let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
-    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
-        messages.value.push({ text: text, name: peerId });
+    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {    
+        const json = JSON.parse(text);
+        console.error('MessageFromPeer', json);
+        emit("sysMessage",json,peerId);         
     });
 
     await rtmClient.on("ConnectionStateChanged", (newState, reason) => {
@@ -50,7 +52,8 @@ onMounted(async () => {
         })
         .then(() => {
             rtmChannel.on("ChannelMessage", (messageData) => {
-                const message = JSON.parse(messageData.text);
+                const message = JSON.parse(messageData.text);      
+              
                 messages.value.push(message);
             });
             rtmChannel.on("MemberJoined", (joinData) => {});
@@ -109,6 +112,8 @@ const sendMessage = () => {
     if (message.value === "") {
         return;
     }
+
+    //console.error(33);
     if (rtmChannel) {
         rtmChannel
             .sendMessage({ text: JSON.stringify(userMessage) })
@@ -124,6 +129,27 @@ const sendMessage = () => {
             });
     }
 };
+
+
+const sendPermissionResponse = (peerId,response) => {
+    const systemMessage = {
+        message: 'permissionResponse',
+        response: response,
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) },peerId)
+            .then(() => {
+            })
+            .catch((err) => {
+                console.log("AgoraRTM rtmClient sendMessageToPeer failure", err);
+            });
+    }
+};
+
+defineExpose({ sendPermissionResponse });
 
 onBeforeUnmount(() => {
     rtmClient.logout();
