@@ -1,6 +1,6 @@
 <script setup>
 import { router, usePage } from "@inertiajs/vue3";
-import { computed,onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
     CogIcon,
@@ -16,8 +16,6 @@ const client = AgoraRTC.createClient({
     codec: "vp9",
     role: "host",
 });
-
-
 
 const localTracks = ref([]);
 const uid = ref(0);
@@ -91,7 +89,6 @@ watch(selectedAudioDevice, async () => {
 });
 
 watch(selectedVideoDevice, async () => {
-
     localTracks.value[1].setDevice(selectedVideoDevice._value);
 
     //await stopLocalTrack();
@@ -99,7 +96,6 @@ watch(selectedVideoDevice, async () => {
     //await playLocalTrack();
     //await publish();
 });
-
 
 const subscribe = async (user, mediaType) => {
     const uid = user.uid;
@@ -116,8 +112,7 @@ const handleUserPublished = (user, mediaType) => {
     subscribe(user, mediaType);
 };
 
-const handleUserUnpublished = (user, mediaType) => {
-};
+const handleUserUnpublished = (user, mediaType) => {};
 
 const closeChooseDevices = () => {
     openChooseDevices.value = false;
@@ -135,7 +130,7 @@ const getDevices = async () => {
             localAudioDevices.value.push(device);
         }
     });
-     selectedAudioDevice.value = localAudioDevices.value[0].deviceId;
+    selectedAudioDevice.value = localAudioDevices.value[0].deviceId;
     selectedVideoDevice.value = localVideoDevices.value[0].deviceId;
 };
 
@@ -164,17 +159,14 @@ const leave = async () => {
     router.visit("/live");
 };
 
-
-
-const accessDevices  = async () => {
-        localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
-        {
-        },
+const accessDevices = async () => {
+    localTracks.value = await AgoraRTC.createMicrophoneAndCameraTracks(
+        {},
         {
             encoderConfig: "720p_auto",
         }
     );
-}
+};
 const publish = async () => {
     await client.publish(localTracks.value);
 };
@@ -186,7 +178,7 @@ const unpublish = async () => {
 const goLive = async () => {
     await join();
     await publish();
-   // await playLocalTrack();
+    // await playLocalTrack();
     isBroadcasting.value = true;
     showPulse.value = true;
 };
@@ -223,8 +215,8 @@ const playLocalTrack = async () => {
 const stopLocalTrack = async () => {
     await localTracks.value[1].stop();
 };
-    client.on("user-published", handleUserPublished);
-    client.on("user-unpublished", handleUserUnpublished);
+client.on("user-published", handleUserPublished);
+client.on("user-unpublished", handleUserUnpublished);
 
 onBeforeUnmount(() => {
     leave();
@@ -237,7 +229,6 @@ onMounted(async () => {
     await playLocalTrack();
     await getDevices();
     await console.log("App ID: " + appId.value);
- 
 });
 </script>
 
@@ -254,7 +245,11 @@ onMounted(async () => {
     <div
         class="relative w-full h-full bg-gray-800 rounded-lg text-2xl font-bold flex justify-center items-center shadow-md shadow-black"
     >
-        <div  id="remote-player" style="display:contents;" class="w-full h-full rounded-lg relative">
+        <div
+            id="remote-player"
+            style="display: contents"
+            class="w-full h-full rounded-lg relative"
+        >
             <div
                 class="absolute w-full h-[calc(100%-96px)] z-20 flex flex-col-reverse gap-5 no-scrollbar overflow-y-scroll mt-12 px-4 bg-gradient-to-b from-transparent to-gray-900/80 via-gray-900/20"
                 v-show="mobileChatOverlay"
