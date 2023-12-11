@@ -22,13 +22,13 @@ const statsBar = ref(true);
 const messages = ref([]);
 const rtmChat = ref();
 
-const sysMessage = (json,peerId) => {
-    console.error('sysMessage',json.message,peerId);
-    if (json.message=='permissionRequest') {
-        if (confirm('Give broadcast permission to '+peerId+' ?')) {
-            rtmChat.value.$.exposed.sendPermissionResponse(peerId,'OK');
+const sysMessage = (json, peerId) => {
+    console.error("sysMessage", json.message, peerId);
+    if (json.message == "permissionRequest") {
+        if (confirm("Give broadcast permission to " + peerId + " ?")) {
+            rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
         } else {
-            rtmChat.value.$.exposed.sendPermissionResponse(peerId,'FAIL');
+            rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
         }
     }
 };
@@ -362,17 +362,14 @@ const tipList = [
                     class="relative h-full border border-gray-700 rounded-b-md mx-4 mb-4 pt-4 overflow-y-auto no-scrollbar"
                 >
                     <HostChat
-                        v-if="rightSidebar === 'chat'"
                         :channelId="channelId"
-                        @channelCount="updateChannelCount" 
+                        :visible="rightSidebar"
+                        @channelCount="updateChannelCount"
                         @sysMessage="sysMessage"
-                        ref="rtmChat"                         
+                        ref="rtmChat"
                     />
-                    <UserList
-                        v-if="rightSidebar === 'users'"
-                        :channelId="channelId"
-                    />
-                    <AdminPanel v-if="rightSidebar === 'admin'" />
+                    <UserList :channelId="channelId" :visible="rightSidebar" />
+                    <AdminPanel :visible="rightSidebar" />
                 </div>
             </div>
         </div>

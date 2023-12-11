@@ -3,12 +3,12 @@ import {
     EllipsisVerticalIcon,
     PaperAirplaneIcon,
 } from "@heroicons/vue/24/outline";
-import { ref, onBeforeUnmount, onMounted,defineExpose, watch } from "vue";
+import { ref, onBeforeUnmount, onMounted, defineExpose, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "./ChatMessage.vue";
 
-const props = defineProps(["channelId"]);
+const props = defineProps(["channelId", "visible"]);
 const emit = defineEmits(["channelCount", "sysMessage"]);
 
 const page = usePage();
@@ -28,10 +28,10 @@ const userData = {
 let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
-    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {    
+    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
         const json = JSON.parse(text);
-        console.error('MessageFromPeer', json);
-        emit("sysMessage",json,peerId);         
+        console.error("MessageFromPeer", json);
+        emit("sysMessage", json, peerId);
     });
 
     await rtmClient.on("ConnectionStateChanged", (newState, reason) => {
@@ -52,8 +52,8 @@ onMounted(async () => {
         })
         .then(() => {
             rtmChannel.on("ChannelMessage", (messageData) => {
-                const message = JSON.parse(messageData.text);      
-              
+                const message = JSON.parse(messageData.text);
+
                 messages.value.push(message);
             });
             rtmChannel.on("MemberJoined", (joinData) => {});
@@ -130,21 +130,22 @@ const sendMessage = () => {
     }
 };
 
-
-const sendPermissionResponse = (peerId,response) => {
+const sendPermissionResponse = (peerId, response) => {
     const systemMessage = {
-        message: 'permissionResponse',
+        message: "permissionResponse",
         response: response,
         userData: userData,
     };
 
     if (rtmClient) {
         rtmClient
-            .sendMessageToPeer({ text: JSON.stringify(systemMessage) },peerId)
-            .then(() => {
-            })
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
             .catch((err) => {
-                console.log("AgoraRTM rtmClient sendMessageToPeer failure", err);
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
             });
     }
 };
@@ -157,30 +158,32 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div
-        id="chatMessages"
-        v-for="message in messages"
-        :key="message.id"
-        class="w-full flex items-center mb-4 mx-4"
-    >
-        <ChatMessage :message="message" />
-    </div>
-
-    <div class="absolute bottom-1 w-full flex justify-center items-center">
-        <input
-            type="text"
-            v-model="message"
-            @keydown.enter="sendMessage"
-            class="relative w-full h-12 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-400 pl-4 pr-12 py-2 border-gray-800 m-2"
-            placeholder="Type a message..."
-        />
-        <button
-            class="absolute right-4 bg-sky-600 hover:bg-sky-500 rounded-lg p-1 text-white"
+    <div :class="{ block: visible === 'chat', hidden: visible !== 'chat' }">
+        <div
+            id="chatMessages"
+            v-for="message in messages"
+            :key="message.id"
+            class="w-full flex items-center mb-4 mx-4"
         >
-            <PaperAirplaneIcon
-                @click="sendMessage"
-                class="w-5 h-5 text-gray-300 cursor-pointer rotate-90"
+            <ChatMessage :message="message" />
+        </div>
+
+        <div class="absolute bottom-1 w-full flex justify-center items-center">
+            <input
+                type="text"
+                v-model="message"
+                @keydown.enter="sendMessage"
+                class="relative w-full h-12 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-400 pl-4 pr-12 py-2 border-gray-800 m-2"
+                placeholder="Type a message..."
             />
-        </button>
+            <button
+                class="absolute right-4 bg-sky-600 hover:bg-sky-500 rounded-lg p-1 text-white"
+            >
+                <PaperAirplaneIcon
+                    @click="sendMessage"
+                    class="w-5 h-5 text-gray-300 cursor-pointer rotate-90"
+                />
+            </button>
+        </div>
     </div>
 </template>
