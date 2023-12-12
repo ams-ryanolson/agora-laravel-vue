@@ -434,6 +434,7 @@ const tipOptions = [
 
 <style>
 .agora_video_player {
-    object-fit: contain !important;
+    object-fit: cover !important;
+    border: 1px solid #ccc;
 }
 </style>

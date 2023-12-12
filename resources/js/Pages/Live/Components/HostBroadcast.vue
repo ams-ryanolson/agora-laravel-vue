@@ -421,5 +421,6 @@ onMounted(async () => {
 <style>
 .agora_video_player {
     object-fit: cover !important;
+    border: 1px solid #ccc;
 }
 </style>
