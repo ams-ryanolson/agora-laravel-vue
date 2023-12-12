@@ -1,31 +1,49 @@
 <script setup>
 import { ref, watch } from "vue";
-import { CheckCircleIcon } from "@heroicons/vue/24/outline";
+import {
+    CheckCircleIcon,
+    ExclamationCircleIcon,
+    XCircleIcon,
+} from "@heroicons/vue/24/outline";
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 
-const props = defineProps(["data", "show"]);
-const emits = defineEmits(["approve", "ignore"]);
+const props = defineProps(["type", "data", "show"]);
+const emits = defineEmits(["close"]);
+
+const open = props.show;
+
+//set the icon based on the type
+const icon = ref("");
+const styleClass = ref("");
+
+switch (props.type) {
+    case "success":
+        icon.value = CheckCircleIcon;
+        styleClass.value = "text-green-500";
+        break;
+    case "error":
+        icon.value = XCircleIcon;
+        styleClass.value = "text-red-500";
+        break;
+    case "warning":
+        icon.value = ExclamationCircleIcon;
+        styleClass.value = "text-yellow-500";
+        break;
+    default:
+        icon.value = CheckCircleIcon;
+        styleClass.value = "text-green-500";
+}
 
 watch(
     () => props.show,
     (value) => {
         if (value) {
             setTimeout(() => {
-                props.show = false;
-            }, 10000);
+                emits("close");
+            }, 5000);
         }
     }
 );
-
-const approve = (peerId) => {
-    emits("approve", peerId);
-    props.show = false;
-};
-
-const ignore = (peerId) => {
-    emits("ignore", peerId);
-    props.show = false;
-};
 </script>
 
 <template>
@@ -46,18 +64,19 @@ const ignore = (peerId) => {
             >
                 <div
                     v-if="show"
-                    class="pointer-events-auto flex w-full max-w-md rounded-lg bg-gray-800 shadow-lg border border-gray-600 ring-1 ring-black ring-opacity-5"
+                    class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-900 border border-gray-600 shadow-lg ring-1 ring-black ring-opacity-5"
                 >
-                    <div class="w-0 flex-1 p-4">
+                    <div class="p-4">
                         <div class="flex items-start">
-                            <div class="flex-shrink-0 pt-0.5">
-                                <img
-                                    class="h-10 w-10 rounded-full"
-                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
-                                    alt=""
+                            <div class="flex-shrink-0">
+                                <component
+                                    :is="icon"
+                                    class="h-6 w-6"
+                                    :class="styleClass"
+                                    aria-hidden="true"
                                 />
                             </div>
-                            <div class="ml-3 w-0 flex-1">
+                            <div class="ml-3 w-0 flex-1 pt-0.5">
                                 <p class="text-sm font-medium text-gray-100">
                                     {{ data.message }}
                                 </p>
@@ -65,26 +84,17 @@ const ignore = (peerId) => {
                                     {{ data.description }}
                                 </p>
                             </div>
-                        </div>
-                    </div>
-                    <div class="flex border-l border-gray-700">
-                        <div class="flex flex-col divide-y divide-gray-600">
-                            <div class="flex h-0 flex-1">
+                            <div class="ml-4 flex flex-shrink-0">
                                 <button
                                     type="button"
-                                    @click="approve(data.peerId)"
-                                    class="flex w-full items-center justify-center rounded-none rounded-tr-lg border border-transparent px-4 py-3 text-sm font-medium antialiased text-sky-500 hover:text-indigo-500 focus:z-10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    @click="emits('close')"
+                                    class="inline-flex rounded-md bg-gray-800 text-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
-                                    Approve
-                                </button>
-                            </div>
-                            <div class="flex h-0 flex-1">
-                                <button
-                                    type="button"
-                                    @click="ignore(data.peerId)"
-                                    class="flex w-full items-center justify-center rounded-none rounded-br-lg border border-transparent px-4 py-3 text-sm font-medium text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    Ignore
+                                    <span class="sr-only">Close</span>
+                                    <XMarkIcon
+                                        class="h-5 w-5"
+                                        aria-hidden="true"
+                                    />
                                 </button>
                             </div>
                         </div>

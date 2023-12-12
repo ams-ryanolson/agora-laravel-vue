@@ -8,7 +8,7 @@ import UserList from "./Components/UserList.vue";
 import AdminPanel from "./Components/AdminPanel.vue";
 import HostBroadcast from "./Components/HostBroadcast.vue";
 import TipUser from "./Components/TipUser.vue";
-import Notification from "./../Components/Notification.vue";
+import JoinRequest from "../Components/JoinRequest.vue";
 
 const page = usePage();
 const rightSidebar = ref("chat");
@@ -24,17 +24,6 @@ const statsBar = ref(true);
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
-
-// const sysMessage = (json, peerId) => {
-//     console.error("sysMessage", json.message, peerId);
-//     if (json.message == "permissionRequest") {
-//         if (confirm("Give broadcast permission to " + peerId + " ?")) {
-//             rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
-//         } else {
-//             rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
-//         }
-//     }
-// };
 
 const sysMessage = (json, peerId) => {
     if (json.message == "permissionRequest") {
@@ -273,7 +262,7 @@ const tipList = [
 </script>
 
 <template>
-    <Notification
+    <JoinRequest
         :data="joinData"
         :show="inviteToStage"
         @approve="approveJoinRequest"
