@@ -8,6 +8,7 @@ import UserList from "./Components/UserList.vue";
 import AdminPanel from "./Components/AdminPanel.vue";
 import HostBroadcast from "./Components/HostBroadcast.vue";
 import TipUser from "./Components/TipUser.vue";
+import Notification from "./../Components/Notification.vue";
 
 const page = usePage();
 const rightSidebar = ref("chat");
@@ -19,18 +20,41 @@ const streamTips = ref("$0");
 const streamLikes = ref(0);
 const channelId = page.props.channelId;
 const statsBar = ref(true);
-const messages = ref([]);
+// const messages = ref([]);
 const rtmChat = ref();
+const joinData = ref(null);
+const inviteToStage = ref(false);
+
+// const sysMessage = (json, peerId) => {
+//     console.error("sysMessage", json.message, peerId);
+//     if (json.message == "permissionRequest") {
+//         if (confirm("Give broadcast permission to " + peerId + " ?")) {
+//             rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
+//         } else {
+//             rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
+//         }
+//     }
+// };
 
 const sysMessage = (json, peerId) => {
-    console.error("sysMessage", json.message, peerId);
     if (json.message == "permissionRequest") {
-        if (confirm("Give broadcast permission to " + peerId + " ?")) {
-            rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
-        } else {
-            rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
-        }
+        joinData.value = {
+            peerId: peerId,
+            message: json.userData.name + " wants to join you on stage",
+            description: "Would you like to let them join you?",
+        };
+        inviteToStage.value = true;
     }
+};
+
+const approveJoinRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
+    inviteToStage.value = false;
+};
+
+const ignoreJoinRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
+    inviteToStage.value = false;
 };
 
 const scrollToBottom = () => {
@@ -249,10 +273,16 @@ const tipList = [
 </script>
 
 <template>
+    <Notification
+        :data="joinData"
+        :show="inviteToStage"
+        @approve="approveJoinRequest"
+        @ignore="ignoreJoinRequest"
+    />
     <!--suppress HtmlRequiredTitleElement -->
     <Head title="Live" />
     <div
-        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-800 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto"
+        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-800 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto bg-gray-900"
     >
         <!-- MAIN CONTENT -->
         <div

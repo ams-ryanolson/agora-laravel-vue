@@ -303,16 +303,16 @@ onMounted(async () => {
             </div>
         </div>
         <div
-            class="absolute top-0 left-0 w-full xs:h-12 md:h-16 bg-gray-900/50"
+            class="absolute top-0 left-0 w-full xs:h-12 md:h-12 bg-gray-900/40"
         ></div>
         <a
             href="/live"
-            class="absolute xs:top-3 md:top-4 left-4 font-logo flex flex-row xs:text-sm md:text-lg"
+            class="absolute xs:top-3 md:top-3 left-4 font-logo flex flex-row xs:text-sm md:text-lg"
         >
             <div class="text-white">REALKINK.</div>
             <div class="text-sky-500">MEN</div>
         </a>
-        <div class="absolute xs:top-2 md:top-4 right-4">
+        <div class="absolute xs:top-2 md:top-3 right-4">
             <span
                 v-if="isBroadcasting"
                 class="rounded-2xl px-6 py-1.5 bg-red-600 font-medium text-white xs:text-sm md:text-lg"
