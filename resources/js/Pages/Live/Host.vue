@@ -20,10 +20,11 @@ const streamTips = ref("$0");
 const streamLikes = ref(0);
 const channelId = page.props.channelId;
 const statsBar = ref(true);
-// const messages = ref([]);
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
+
+const broadcasters = ref([]);
 
 const sysMessage = (json, peerId) => {
     if (json.message == "permissionRequest") {
@@ -73,8 +74,15 @@ onMounted(() => {
 });
 
 const updateChannelCount = (count) => {
+    console.error('updateChannelCount',count);
     channelCount.value = count;
     channelViews.value = channelViews.value + 1;
+};
+
+const updateChatMembers = (blist) => {
+   broadcasters.value=[...blist.value];
+console.error('broadcasters',broadcasters);
+   
 };
 
 const shouldShowItem = (item) => {
@@ -385,9 +393,14 @@ const tipList = [
                         :visible="rightSidebar"
                         @channelCount="updateChannelCount"
                         @sysMessage="sysMessage"
+                        @chatMembersUpdate="updateChatMembers"
                         ref="rtmChat"
                     />
-                    <UserList :channelId="channelId" :visible="rightSidebar" />
+                    <UserList                                        
+                     :channelCount="channelCount"                     
+                     :broadcasters="broadcasters"                     
+                     :channelId="channelId" 
+                     :visible="rightSidebar" />
                     <AdminPanel :visible="rightSidebar" />
                 </div>
             </div>

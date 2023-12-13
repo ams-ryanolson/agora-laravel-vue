@@ -1,7 +1,6 @@
 <script setup>
-const props = defineProps(["visible"]);
-
-const broadcasters = [{}];
+const props = defineProps(["visible","broadcasters","channelCount"]);
+import UserItem from "./UserItem.vue";
 
 const viewers = [{}];
 </script>
@@ -16,16 +15,26 @@ const viewers = [{}];
                 <div class="text-xl font-semibold text-gray-100">
                     Broadcasters
                 </div>
-                <div class="font-medium text-lg text-gray-100">1</div>
+                <div class="font-medium text-lg text-gray-100">Count</div>
             </div>
-            <div>PUT BROADCASTERS HERE</div>
+            <div>
+                <div
+                    id="users"
+                    v-for="user in props.broadcasters"
+                    :key="user.id"
+                    class="w-full flex items-center mb-4 mx-4"
+                >
+                    <UserItem :user="user" />
+                </div>
+
+            </div>
         </div>
         <div class="">
             <div class="flex flex-row justify-between items-center">
                 <div class="text-xl font-semibold text-gray-100">
-                    Broadcasters
+                    Audience
                 </div>
-                <div class="font-medium text-lg text-gray-100">24</div>
+                <div class="font-medium text-lg text-gray-100">{{props.channelCount}}</div>
             </div>
             <div>PUT VIEWERS HERE</div>
         </div>

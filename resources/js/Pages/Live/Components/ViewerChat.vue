@@ -61,10 +61,11 @@ onMounted(async () => {
             console.log("AgoraRTM channel login failure", err);
         });
 
+       
     await rtmClient
         .setLocalUserAttributes({
-            name: page.props.auth.user.name,
-            avatar: page.props.auth.user.profile_photo_path,
+            name: page.props.auth.user.name || "na",
+            avatar: page.props.auth.user.profile_photo_path || "na",
         })
         .then(() => {
             console.log("AgoraRTM client set local user attributes success");
@@ -126,6 +127,7 @@ const sendMessage = () => {
 };
 
 onBeforeUnmount(() => {
+    rtmChannel.leave();
     rtmClient.logout();
 });
 

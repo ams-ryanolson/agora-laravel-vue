@@ -32,7 +32,7 @@ const createMediaGatewayToken = async () => {
             .post("/live/createmediagatewaytoken", {
                 userId: page.auth.user.id,
                 region: "na",
-                appId: "4fb2753a5318441f864b4ddc6118ab06",
+                appId: page.props.appId,
             })
             .then((response) => {
                 console.log(response.data);

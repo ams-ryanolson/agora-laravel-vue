@@ -9,10 +9,10 @@ import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "./ChatMessage.vue";
 
 const props = defineProps(["channelId", "visible"]);
-const emit = defineEmits(["channelCount", "sysMessage"]);
+const emit = defineEmits(["channelCount", "sysMessage", "chatMembersUpdate"]);
 
 const page = usePage();
-const appId = "4fb2753a5318441f864b4ddc6118ab06";
+const appId = page.props.appId;
 const token = ref(page.props.rtmToken);
 const channelName = props.channelId;
 const messages = ref([]);
@@ -28,9 +28,9 @@ const userData = {
 let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
-    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
+    await rtmClient.on("MessageFromPeer", ({ tex }, peerId) => {
         const json = JSON.parse(text);
-        console.error("MessageFromPeer", json);
+       // console.error("MessageFromPeer", json);
         emit("sysMessage", json, peerId);
     });
 
@@ -53,22 +53,41 @@ onMounted(async () => {
         .then(() => {
             rtmChannel.on("ChannelMessage", (messageData) => {
                 const message = JSON.parse(messageData.text);
-
                 messages.value.push(message);
             });
-            rtmChannel.on("MemberJoined", (joinData) => {});
-            rtmChannel.on("MemberLeft", (leftData) => {
-                console.log("MemberLeft", leftData);
+            rtmChannel.on("MemberJoined", async (member) => {
+                console.warn('MemberJoined',member);
+                try {
+                const attributes = await rtmClient.getUserAttributes(
+                    member
+                );
+                attributes.id = member;
+                chatMembers.value.push(attributes);
+                emit("chatMembersUpdate", chatMembers);
+                getChannelCount();
+                } catch (err) {}
+            });
+            rtmChannel.on("MemberLeft", (member) => {
+                console.warn('MemberLeft',member);
+                const indexToRemove = chatMembers.value.findIndex(element => element['id'] === member);
+                console.error("MemberLeft 1",indexToRemove,chatMembers.value);
+                if (indexToRemove !== -1) {
+                    chatMembers.value.splice(indexToRemove, 1);
+                }
+                console.error("MemberLeft 2",indexToRemove,chatMembers.value);
+                emit("chatMembersUpdate", chatMembers);
+                getChannelCount();
             });
         })
         .catch((err) => {
             console.log("AgoraRTM channel login failure", err);
         });
 
+
     await rtmClient
         .setLocalUserAttributes({
-            name: page.props.auth.user.name,
-            avatar: page.props.auth.user.profile_photo_path,
+            name: page.props.auth.user.name || "na",
+            avatar: page.props.auth.user.profile_photo_path || "na",
         })
         .then(() => {
             console.log("AgoraRTM client set local user attributes success");
@@ -83,12 +102,14 @@ onMounted(async () => {
     await rtmChannel.getMembers().then((members) => {
         Promise.all(
             members.map(async (member) => {
+              //  console.warn('getMembers',member);
                 try {
                     const attributes = await rtmClient.getUserAttributes(
                         member
                     );
-                    attributes.userId = member;
-                    chatMembers.value.push(attributes);
+                    attributes.id = member;
+                    chatMembers.value.push(attributes);                    
+                    emit("chatMembersUpdate", chatMembers);
                 } catch (err) {}
             })
         );
@@ -153,6 +174,7 @@ const sendPermissionResponse = (peerId, response) => {
 defineExpose({ sendPermissionResponse });
 
 onBeforeUnmount(() => {
+    rtmChannel.leave();
     rtmClient.logout();
 });
 </script>

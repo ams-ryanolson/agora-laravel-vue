@@ -48,7 +48,6 @@ const notificationOpen = ref(false);
 
 //join as audience
 const join = async () => {
-    // alert(appId.value+' channel '+channelId.value+' token '+token.value+ ' id ' + page.props.auth.user.id);
     client.on("user-published", handleUserPublished);
     client.on("user-unpublished", handleUserUnpublished);
     await client.join(
