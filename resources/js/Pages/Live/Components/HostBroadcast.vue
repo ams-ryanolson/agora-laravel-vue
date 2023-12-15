@@ -32,7 +32,8 @@ const openChooseDevices = ref(false);
 const selectedAudioDevice = ref("");
 const selectedVideoDevice = ref("");
 const mobileChatOverlay = ref(false);
-const emit = defineEmits(["endStream"]);
+const broadcasters = ref([]);
+const emit = defineEmits(["endStream","broadcastersUpdate"]);
 
 const testChatMessages = [
     {
@@ -108,11 +109,28 @@ const subscribe = async (user, mediaType) => {
         user.audioTrack.play();
     }
 };
-const handleUserPublished = (user, mediaType) => {
-    subscribe(user, mediaType);
+
+const insertBroadcaster = async (uid) => {
+    broadcasters.value.push(uid);
+    emit("broadcastersUpdate", broadcasters);
 };
 
-const handleUserUnpublished = (user, mediaType) => {};
+const removeBroadcaster = async (uid) => {
+    const index =  broadcasters.value.indexOf(uid);
+    if (index > -1) { 
+        broadcasters.value.splice(index, 1); 
+    }
+    emit("broadcastersUpdate", broadcasters);
+};
+
+const handleUserPublished = (user, mediaType) => {
+    subscribe(user, mediaType);
+    insertBroadcaster(user.uid);
+};
+
+const handleUserUnpublished = (user, mediaType) => {
+    removeBroadcaster(user.uid);
+};
 
 const closeChooseDevices = () => {
     openChooseDevices.value = false;
@@ -148,14 +166,15 @@ const join = async () => {
         token.value,
         page.props.auth.user.id
     );
+
+     insertBroadcaster(page.props.auth.user.id);
 };
 
 const leave = async () => {
-    //confirm before leaving
     alert("Are you sure you want to end the live stream?");
+    removeBroadcaster(page.props.auth.user.id);
     await client.leave();
     isBroadcasting.value = false;
-    //redirect to /live
     router.visit("/live");
 };
 

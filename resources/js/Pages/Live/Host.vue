@@ -24,7 +24,9 @@ const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
 
+const broadcasterUIDs = ref([]);
 const broadcasters = ref([]);
+const viewers = ref([]);
 
 const sysMessage = (json, peerId) => {
     if (json.message == "permissionRequest") {
@@ -65,7 +67,6 @@ const updateStreamTime = () => {
 
     const minutes = formatTimeComponent(rawMinutes);
     const seconds = formatTimeComponent(rawSeconds);
-
     streamTime.value = `${hours}:${minutes}:${seconds}`;
 };
 
@@ -74,15 +75,30 @@ onMounted(() => {
 });
 
 const updateChannelCount = (count) => {
-    console.error('updateChannelCount',count);
     channelCount.value = count;
     channelViews.value = channelViews.value + 1;
 };
 
-const updateChatMembers = (blist) => {
-   broadcasters.value=[...blist.value];
-console.error('broadcasters',broadcasters);
-   
+const updateChatMembers = (chatList) => {
+   viewers.value=[...chatList.value];   
+   copyBroadcasters();
+};
+
+const broadcastersUpdate = (blist) => {
+   broadcasterUIDs.value=[...blist.value];    
+   copyBroadcasters();  
+};
+
+const copyBroadcasters = () => {
+   let tmp=[];   
+   broadcasterUIDs.value.forEach((uid) => {
+        const copy = viewers.value.findIndex(element => element['id'] == uid);
+        if (copy !== -1) {
+            tmp.push(viewers.value[copy]);
+        }
+     }   
+   );
+   broadcasters.value=[...tmp];      
 };
 
 const shouldShowItem = (item) => {
@@ -285,7 +301,10 @@ const tipList = [
         <div
             class="relative col-span-6 border-r border-gray-800 h-screen p-3 flex flex-col gap-4"
         >
-            <HostBroadcast @endStream="deleteStream" />
+            <HostBroadcast 
+                @broadcastersUpdate="broadcastersUpdate"
+                @endStream="deleteStream" 
+            />
             <div class="flex flex-col pt-3 w-full bg-gray-800 rounded-lg">
                 <div
                     class="flex w-full justify-center items-center xs:col-span-3 md:col-span-5 pb-2"
@@ -393,12 +412,13 @@ const tipList = [
                         :visible="rightSidebar"
                         @channelCount="updateChannelCount"
                         @sysMessage="sysMessage"
-                        @chatMembersUpdate="updateChatMembers"
+                        @chatMembersUpdate="updateChatMembers"                        
                         ref="rtmChat"
                     />
                     <UserList                                        
                      :channelCount="channelCount"                     
-                     :broadcasters="broadcasters"                     
+                     :broadcasters="broadcasters"       
+                     :viewers="viewers"                     
                      :channelId="channelId" 
                      :visible="rightSidebar" />
                     <AdminPanel :visible="rightSidebar" />
