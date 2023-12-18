@@ -30,7 +30,7 @@ let uid = page.props.auth.user.id.toString();
 onMounted(async () => {
     await rtmClient.on("MessageFromPeer", ({ tex }, peerId) => {
         const json = JSON.parse(text);
-       // console.error("MessageFromPeer", json);
+        // console.error("MessageFromPeer", json);
         emit("sysMessage", json, peerId);
     });
 
@@ -56,25 +56,27 @@ onMounted(async () => {
                 messages.value.push(message);
             });
             rtmChannel.on("MemberJoined", async (member) => {
-                console.warn('MemberJoined',member);
+                console.warn("MemberJoined", member);
                 try {
-                const attributes = await rtmClient.getUserAttributes(
-                    member
-                );
-                attributes.id = member;
-                chatMembers.value.push(attributes);
-                emit("chatMembersUpdate", chatMembers);
-                getChannelCount();
+                    const attributes = await rtmClient.getUserAttributes(
+                        member
+                    );
+                    attributes.id = member;
+                    chatMembers.value.push(attributes);
+                    emit("chatMembersUpdate", chatMembers);
+                    getChannelCount();
                 } catch (err) {}
             });
             rtmChannel.on("MemberLeft", (member) => {
-                console.warn('MemberLeft',member);
-                const indexToRemove = chatMembers.value.findIndex(element => element['id'] === member);
-                console.error("MemberLeft 1",indexToRemove,chatMembers.value);
+                console.warn("MemberLeft", member);
+                const indexToRemove = chatMembers.value.findIndex(
+                    (element) => element["id"] === member
+                );
+                console.error("MemberLeft 1", indexToRemove, chatMembers.value);
                 if (indexToRemove !== -1) {
                     chatMembers.value.splice(indexToRemove, 1);
                 }
-                console.error("MemberLeft 2",indexToRemove,chatMembers.value);
+                console.error("MemberLeft 2", indexToRemove, chatMembers.value);
                 emit("chatMembersUpdate", chatMembers);
                 getChannelCount();
             });
@@ -82,7 +84,6 @@ onMounted(async () => {
         .catch((err) => {
             console.log("AgoraRTM channel login failure", err);
         });
-
 
     await rtmClient
         .setLocalUserAttributes({
@@ -102,13 +103,13 @@ onMounted(async () => {
     await rtmChannel.getMembers().then((members) => {
         Promise.all(
             members.map(async (member) => {
-              //  console.warn('getMembers',member);
+                //  console.warn('getMembers',member);
                 try {
                     const attributes = await rtmClient.getUserAttributes(
                         member
                     );
                     attributes.id = member;
-                    chatMembers.value.push(attributes);                    
+                    chatMembers.value.push(attributes);
                     emit("chatMembersUpdate", chatMembers);
                 } catch (err) {}
             })
@@ -203,7 +204,7 @@ onBeforeUnmount(() => {
             >
                 <PaperAirplaneIcon
                     @click="sendMessage"
-                    class="w-5 h-5 text-gray-300 cursor-pointer rotate-90"
+                    class="w-5 h-5 text-gray-300 cursor-pointer"
                 />
             </button>
         </div>

@@ -8,7 +8,14 @@ import {
     EllipsisVerticalIcon,
 } from "@heroicons/vue/24/outline";
 import ChooseDevices from "./ChooseDevices.vue";
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import {
+    Menu,
+    MenuButton,
+    MenuItems,
+    MenuItem,
+    TransitionRoot,
+    TransitionChild,
+} from "@headlessui/vue";
 
 const page = usePage();
 const client = AgoraRTC.createClient({
@@ -33,7 +40,7 @@ const selectedAudioDevice = ref("");
 const selectedVideoDevice = ref("");
 const mobileChatOverlay = ref(false);
 const broadcasters = ref([]);
-const emit = defineEmits(["endStream","broadcastersUpdate"]);
+const emit = defineEmits(["endStream", "broadcastersUpdate"]);
 
 const testChatMessages = [
     {
@@ -116,9 +123,9 @@ const insertBroadcaster = async (uid) => {
 };
 
 const removeBroadcaster = async (uid) => {
-    const index =  broadcasters.value.indexOf(uid);
-    if (index > -1) { 
-        broadcasters.value.splice(index, 1); 
+    const index = broadcasters.value.indexOf(uid);
+    if (index > -1) {
+        broadcasters.value.splice(index, 1);
     }
     emit("broadcastersUpdate", broadcasters);
 };
@@ -167,7 +174,7 @@ const join = async () => {
         page.props.auth.user.id
     );
 
-     insertBroadcaster(page.props.auth.user.id);
+    insertBroadcaster(page.props.auth.user.id);
 };
 
 const leave = async () => {
@@ -247,7 +254,7 @@ onMounted(async () => {
     await accessDevices();
     await playLocalTrack();
     await getDevices();
-    await console.log("App ID: " + appId.value);
+    setIsLoading();
 });
 </script>
 
@@ -323,14 +330,15 @@ onMounted(async () => {
         </div>
         <div
             class="absolute top-0 left-0 w-full xs:h-12 md:h-12 bg-gray-900/40"
-        ></div>
-        <a
-            href="/live"
-            class="absolute xs:top-3 md:top-3 left-4 font-logo flex flex-row xs:text-sm md:text-lg"
         >
-            <div class="text-white">REALKINK.</div>
-            <div class="text-sky-500">MEN</div>
-        </a>
+            <div
+                class="absolute top-3 left-4 font-logo flex flex-row text-sm md:text-lg"
+            >
+                <div class="text-white">REALKINK.</div>
+                <div class="text-sky-500">MEN</div>
+            </div>
+        </div>
+
         <div class="absolute xs:top-2 md:top-3 right-4">
             <span
                 v-if="isBroadcasting"
@@ -440,6 +448,6 @@ onMounted(async () => {
 <style>
 .agora_video_player {
     object-fit: cover !important;
-    border: 1px solid #ccc;
+    border-radius: 0.5rem;
 }
 </style>

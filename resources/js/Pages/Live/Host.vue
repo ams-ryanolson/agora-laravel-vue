@@ -23,10 +23,32 @@ const statsBar = ref(true);
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
+const pageLoading = ref(true);
 
 const broadcasterUIDs = ref([]);
 const broadcasters = ref([]);
 const viewers = ref([]);
+
+const rightSidebarTop = [
+    {
+        id: 1,
+        title: "Chat",
+        icon: "ChatAlt2Icon",
+        visible: true,
+    },
+    {
+        id: 2,
+        title: "Users",
+        icon: "UsersIcon",
+        visible: true,
+    },
+    {
+        id: 3,
+        title: "Admin",
+        icon: "CogIcon",
+        visible: true,
+    },
+];
 
 const sysMessage = (json, peerId) => {
     if (json.message == "permissionRequest") {
@@ -70,8 +92,15 @@ const updateStreamTime = () => {
     streamTime.value = `${hours}:${minutes}:${seconds}`;
 };
 
+const setPageLoading = () => {
+    setTimeout(() => {
+        pageLoading.value = false;
+    }, 5000); // 5000 milliseconds = 5 seconds
+};
+
 onMounted(() => {
     scrollToBottom();
+    setPageLoading();
 });
 
 const updateChannelCount = (count) => {
@@ -80,25 +109,24 @@ const updateChannelCount = (count) => {
 };
 
 const updateChatMembers = (chatList) => {
-   viewers.value=[...chatList.value];   
-   copyBroadcasters();
+    viewers.value = [...chatList.value];
+    copyBroadcasters();
 };
 
 const broadcastersUpdate = (blist) => {
-   broadcasterUIDs.value=[...blist.value];    
-   copyBroadcasters();  
+    broadcasterUIDs.value = [...blist.value];
+    copyBroadcasters();
 };
 
 const copyBroadcasters = () => {
-   let tmp=[];   
-   broadcasterUIDs.value.forEach((uid) => {
-        const copy = viewers.value.findIndex(element => element['id'] == uid);
+    let tmp = [];
+    broadcasterUIDs.value.forEach((uid) => {
+        const copy = viewers.value.findIndex((element) => element["id"] == uid);
         if (copy !== -1) {
             tmp.push(viewers.value[copy]);
         }
-     }   
-   );
-   broadcasters.value=[...tmp];      
+    });
+    broadcasters.value = [...tmp];
 };
 
 const shouldShowItem = (item) => {
@@ -294,36 +322,47 @@ const tipList = [
     />
     <!--suppress HtmlRequiredTitleElement -->
     <Head title="Live" />
+    <TransitionRoot
+        :show="pageLoading"
+        leave="transition fade-out duration-200"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+        class="absolute left-0 top-0 w-full h-full bg-gray-950 z-50"
+    >
+        <div
+            class="flex flex-row justify-center items-center my-auto h-full animate-pulse"
+        >
+            <div class="text-3xl text-white font-logo">REALKINK.</div>
+            <div class="text-3xl text-sky-500 font-logo">MEN</div>
+        </div>
+    </TransitionRoot>
     <div
-        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-800 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto bg-gray-900"
+        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-800 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto bg-gray-900 overflow-y-hidden"
     >
         <!-- MAIN CONTENT -->
         <div
             class="relative col-span-6 border-r border-gray-800 h-screen p-3 flex flex-col gap-4"
         >
-            <HostBroadcast 
+            <HostBroadcast
                 @broadcastersUpdate="broadcastersUpdate"
-                @endStream="deleteStream" 
+                @endStream="deleteStream"
             />
-            <div class="flex flex-col pt-3 w-full bg-gray-800 rounded-lg">
+            <div class="flex flex-col w-full bg-gray-800 rounded-lg">
                 <div
-                    class="flex w-full justify-center items-center xs:col-span-3 md:col-span-5 pb-2"
+                    class="flex w-full justify-center items-center xs:col-span-3 md:col-span-5"
+                    :class="{
+                        'my-2': !statsBar,
+                        'my-2': statsBar,
+                    }"
                 >
                     <Bars2Icon
                         @click="statsBar = !statsBar"
                         class="w-24 h-6 text-gray-100"
                     />
                 </div>
-                <TransitionRoot as="div" :show="statsBar">
-                    <TransitionChild
-                        as="div"
-                        enter="ease-out duration-300"
-                        enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        enter-to="opacity-100 translate-y-0 sm:scale-100"
-                        leave="ease-in duration-200"
-                        leave-from="opacity-100 translate-y-0 sm:scale-100"
-                        leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        class="w-full bg-gray-800 rounded-lg text-2xl font-bold grid xs:grid-cols-3 md:grid-cols-5 gap-2 items-center px-6 pb-4 shadow-md shadow-black"
+                <div v-show="statsBar">
+                    <div
+                        class="w-full bg-gray-800 rounded-lg text-2xl font-bold grid grid-cols-3 md:grid-cols-5 gap-2 items-center px-6 pb-4 shadow-md shadow-black"
                     >
                         <div
                             v-for="item in filteredStreamStats"
@@ -331,7 +370,7 @@ const tipList = [
                             class=""
                         >
                             <div
-                                class="flex flex-col bg-gray-900 shadow-md shadow-black rounded-lg p-4 w-full transform transition-transform hover:translate-y-1"
+                                class="flex flex-col justify-center items-center bg-gray-900 shadow-md shadow-black rounded-lg p-4 w-full transform transition-transform hover:translate-y-1"
                             >
                                 <div class="text-2xl font-medium text-gray-100">
                                     {{ item.stat }}
@@ -341,11 +380,11 @@ const tipList = [
                                 </div>
                             </div>
                         </div>
-                    </TransitionChild>
-                </TransitionRoot>
+                    </div>
+                </div>
             </div>
             <div
-                class="w-full h-60 rounded-lg text-2xl font-bold xs:hidden md:flex justify-center items-center flex-row gap-4 shadow-md shadow-black"
+                class="w-full h-60 rounded-lg text-2xl font-bold hidden md:flex justify-center items-center flex-row gap-4 shadow-md shadow-black"
             >
                 <div
                     class="w-full h-60 rounded-lg flex flex-col p-4 bg-gray-800 gap-2"
@@ -368,40 +407,25 @@ const tipList = [
             </div>
         </div>
         <!-- SIDE BAR CHAT -->
-        <div class="xs:hidden md:block col-span-3 h-screen p-3">
+        <div class="hidden md:block col-span-3 h-screen p-3">
             <div
                 class="w-full h-full bg-gray-800 rounded-lg flex flex-col shadow-md shadow-black"
             >
                 <div class="w-full flex justify-between items-center px-4 pt-3">
                     <div
-                        class="cursor-pointer text-xl font-medium text-gray-100 flex justify-center items-center text-center flex-1 rounded-t-xl shadow-lg border border-gray-700 hover:bg-sky-600"
+                        v-for="item in rightSidebarTop"
+                        :key="item.id"
+                        class="w-full cursor-pointer font-medium text-gray-50 antialiased flex justify-center items-center text-center flex-1"
                         :class="[
-                            { 'bg-sky-500': rightSidebar === 'chat' },
-                            'bg-gray-600',
+                            {
+                                'border-b-2 border-sky-600':
+                                    rightSidebar === item.title.toLowerCase(),
+                            },
+                            'border-b-2 border-gray-700 hover:border-sky-600',
                         ]"
-                        @click="rightSidebar = 'chat'"
+                        @click="rightSidebar = item.title.toLowerCase()"
                     >
-                        Chat
-                    </div>
-                    <div
-                        class="cursor-pointer text-xl font-medium text-gray-100 flex justify-center items-center text-center flex-1 rounded-t-xl shadow-lg border border-gray-700 hover:bg-sky-600"
-                        :class="[
-                            { 'bg-sky-500': rightSidebar === 'users' },
-                            'bg-gray-600',
-                        ]"
-                        @click="rightSidebar = 'users'"
-                    >
-                        Users
-                    </div>
-                    <div
-                        class="cursor-pointer text-xl font-medium text-gray-100 flex justify-center items-center text-center flex-1 rounded-t-xl shadow-lg border border-gray-700 hover:bg-sky-600"
-                        :class="[
-                            { 'bg-sky-500': rightSidebar === 'admin' },
-                            'bg-gray-600',
-                        ]"
-                        @click="rightSidebar = 'admin'"
-                    >
-                        Admin
+                        {{ item.title }}
                     </div>
                 </div>
                 <div
@@ -412,15 +436,16 @@ const tipList = [
                         :visible="rightSidebar"
                         @channelCount="updateChannelCount"
                         @sysMessage="sysMessage"
-                        @chatMembersUpdate="updateChatMembers"                        
+                        @chatMembersUpdate="updateChatMembers"
                         ref="rtmChat"
                     />
-                    <UserList                                        
-                     :channelCount="channelCount"                     
-                     :broadcasters="broadcasters"       
-                     :viewers="viewers"                     
-                     :channelId="channelId" 
-                     :visible="rightSidebar" />
+                    <UserList
+                        :channelCount="channelCount"
+                        :broadcasters="broadcasters"
+                        :viewers="viewers"
+                        :channelId="channelId"
+                        :visible="rightSidebar"
+                    />
                     <AdminPanel :visible="rightSidebar" />
                 </div>
             </div>
