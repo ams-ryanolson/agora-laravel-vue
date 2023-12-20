@@ -6,7 +6,7 @@ import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "./ChatMessage.vue";
 
 const props = defineProps(["channelId"]);
-const emit = defineEmits(["channelCount","sysMessage"]);
+const emit = defineEmits(["channelCount", "sysMessage"]);
 
 const page = usePage();
 const appId = page.props.appId;
@@ -28,7 +28,7 @@ let uid = page.props.auth.user.id.toString();
 onMounted(async () => {
     await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
         const json = JSON.parse(text);
-        emit("sysMessage",json,peerId);               
+        emit("sysMessage", json, peerId);
     });
 
     await rtmClient.on("ConnectionStateChanged", (newState, reason) => {
@@ -61,7 +61,6 @@ onMounted(async () => {
             console.log("AgoraRTM channel login failure", err);
         });
 
-       
     await rtmClient
         .setLocalUserAttributes({
             name: page.props.auth.user.name || "na",
@@ -102,7 +101,6 @@ const getChannelCount = async () => {
 };
 
 const sendMessage = () => {
-
     const userMessage = {
         text: message.value,
         userData: userData,
@@ -132,20 +130,27 @@ onBeforeUnmount(() => {
 });
 
 const sendPermissionRequest = (peerId) => {
-
     const systemMessage = {
-        message: 'permissionRequest',
+        message: "permissionRequest",
         userData: userData,
     };
 
     if (rtmClient) {
         rtmClient
-            .sendMessageToPeer({ text: JSON.stringify(systemMessage) },peerId)
-            .then(() => {
-            })
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
             .catch((err) => {
-                console.log("AgoraRTM rtmClient sendMessageToPeer failure", err);
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
             });
+    }
+};
+
+const sysMessage = (json, peerId) => {
+    if (json.message === "permissionRequest") {
+        emit("permissionRequest", json.userData, peerId);
     }
 };
 

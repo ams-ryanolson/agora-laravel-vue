@@ -269,7 +269,7 @@ onMounted(async () => {
         @newVideoDevice="selectedVideoDevice = $event"
     />
     <div
-        class="relative w-full h-full bg-gray-800 rounded-lg text-2xl font-bold flex justify-center items-center shadow-md shadow-black"
+        class="relative w-full h-full bg-gray-900 rounded-lg text-2xl font-bold flex justify-center items-center shadow-md shadow-black"
     >
         <div
             id="remote-player"
@@ -309,7 +309,7 @@ onMounted(async () => {
                             leave-to-class="transform opacity-0 scale-95"
                         >
                             <MenuItems
-                                class="z-50 absolute border border-gray-700 text-sm right-0 mt-2 w-40 origin-top-right bg-gray-900 divide-y divide-gray-600 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto"
+                                class="z-50 absolute border border-gray-800 text-sm right-0 mt-2 w-40 origin-top-right bg-gray-900 divide-y divide-gray-600 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto"
                             >
                                 <div class="px-1 py-2">
                                     <MenuItem

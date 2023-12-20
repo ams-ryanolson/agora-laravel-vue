@@ -28,7 +28,7 @@ const userData = {
 let uid = page.props.auth.user.id.toString();
 
 onMounted(async () => {
-    await rtmClient.on("MessageFromPeer", ({ tex }, peerId) => {
+    await rtmClient.on("MessageFromPeer", ({ text }, peerId) => {
         const json = JSON.parse(text);
         // console.error("MessageFromPeer", json);
         emit("sysMessage", json, peerId);
@@ -128,6 +128,7 @@ const getChannelCount = async () => {
 
 const sendMessage = () => {
     const userMessage = {
+        id: null,
         text: message.value,
         userData: userData,
     };
@@ -135,12 +136,12 @@ const sendMessage = () => {
         return;
     }
 
-    //console.error(33);
     if (rtmChannel) {
         rtmChannel
             .sendMessage({ text: JSON.stringify(userMessage) })
             .then(() => {
                 messages.value.push({
+                    id: Date.now() + Math.random().toString(6).substr(2, 9),
                     text: message.value,
                     userData: userData,
                 });
@@ -172,6 +173,29 @@ const sendPermissionResponse = (peerId, response) => {
     }
 };
 
+const sendDeleteMessage = (messageId) => {
+    const systemMessage = {
+        message: "deleteMessage",
+        messageId: messageId,
+    };
+
+    if (rtmChannel) {
+        rtmChannel
+            .sendMessage({ text: JSON.stringify(systemMessage) })
+            .then(() => {
+                const indexToRemove = messages.value.findIndex(
+                    (element) => element["id"] === messageId
+                );
+                if (indexToRemove !== -1) {
+                    messages.value.splice(indexToRemove, 1);
+                }
+            })
+            .catch((err) => {
+                console.log("AgoraRTM channel sendMessage failure", err);
+            });
+    }
+};
+
 defineExpose({ sendPermissionResponse });
 
 onBeforeUnmount(() => {
@@ -186,9 +210,13 @@ onBeforeUnmount(() => {
             id="chatMessages"
             v-for="message in messages"
             :key="message.id"
-            class="w-full flex items-center mb-4 mx-4"
+            class="w-full flex items-center"
         >
-            <ChatMessage :message="message" />
+            <ChatMessage
+                :message="message"
+                :host="true"
+                @deleteMessage="sendDeleteMessage"
+            />
         </div>
 
         <div class="absolute bottom-1 w-full flex justify-center items-center">
@@ -196,7 +224,7 @@ onBeforeUnmount(() => {
                 type="text"
                 v-model="message"
                 @keydown.enter="sendMessage"
-                class="relative w-full h-12 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-400 pl-4 pr-12 py-2 border-gray-800 m-2"
+                class="relative w-full h-12 rounded-lg bg-gray-800 text-gray-100 placeholder-gray-400 pl-4 pr-12 py-2 border-gray-900 m-2 shadow-lg"
                 placeholder="Type a message..."
             />
             <button

@@ -337,7 +337,7 @@ const tipList = [
         </div>
     </TransitionRoot>
     <div
-        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-800 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto bg-gray-900 overflow-y-hidden"
+        class="grid xs:grid-cols-6 md:grid-cols-9 border-r border-l border-gray-900 xs:min-h-screen-app md:h-screen max-w-[1600px] mx-auto bg-gray-950 overflow-y-hidden"
     >
         <!-- MAIN CONTENT -->
         <div
@@ -347,7 +347,7 @@ const tipList = [
                 @broadcastersUpdate="broadcastersUpdate"
                 @endStream="deleteStream"
             />
-            <div class="flex flex-col w-full bg-gray-800 rounded-lg">
+            <div class="flex flex-col w-full bg-gray-900 rounded-lg">
                 <div
                     class="flex w-full justify-center items-center xs:col-span-3 md:col-span-5"
                     :class="{
@@ -362,7 +362,7 @@ const tipList = [
                 </div>
                 <div v-show="statsBar">
                     <div
-                        class="w-full bg-gray-800 rounded-lg text-2xl font-bold grid grid-cols-3 md:grid-cols-5 gap-2 items-center px-6 pb-4 shadow-md shadow-black"
+                        class="w-full bg-gray-900 rounded-lg text-2xl font-bold grid grid-cols-3 md:grid-cols-5 gap-2 items-center px-6 pb-4 shadow-md shadow-black"
                     >
                         <div
                             v-for="item in filteredStreamStats"
@@ -370,7 +370,7 @@ const tipList = [
                             class=""
                         >
                             <div
-                                class="flex flex-col justify-center items-center bg-gray-900 shadow-md shadow-black rounded-lg p-4 w-full transform transition-transform hover:translate-y-1"
+                                class="flex flex-col justify-center items-center bg-gray-950 shadow-md shadow-black rounded-lg p-4 w-full transform transition-transform hover:translate-y-1"
                             >
                                 <div class="text-2xl font-medium text-gray-100">
                                     {{ item.stat }}
@@ -387,14 +387,14 @@ const tipList = [
                 class="w-full h-60 rounded-lg text-2xl font-bold hidden md:flex justify-center items-center flex-row gap-4 shadow-md shadow-black"
             >
                 <div
-                    class="w-full h-60 rounded-lg flex flex-col p-4 bg-gray-800 gap-2"
+                    class="w-full h-60 rounded-lg flex flex-col p-4 bg-gray-900 gap-2"
                 >
                     <!-- Graph showing total users in chat per minute -->
                 </div>
 
                 <div
                     id="messagesContainer"
-                    class="w-full h-60 rounded-lg flex flex-col p-4 gap-2 bg-gray-800 overflow-y-auto no-scrollbar"
+                    class="w-full h-60 rounded-lg flex flex-col p-4 gap-2 bg-gray-900 overflow-y-auto no-scrollbar"
                 >
                     <div
                         class="text-white flex flex-row justify-between items-center gap-4"
@@ -409,7 +409,7 @@ const tipList = [
         <!-- SIDE BAR CHAT -->
         <div class="hidden md:block col-span-3 h-screen p-3">
             <div
-                class="w-full h-full bg-gray-800 rounded-lg flex flex-col shadow-md shadow-black"
+                class="w-full h-full bg-gray-900 rounded-lg flex flex-col shadow-md shadow-black"
             >
                 <div class="w-full flex justify-between items-center px-4 pt-3">
                     <div
@@ -429,7 +429,7 @@ const tipList = [
                     </div>
                 </div>
                 <div
-                    class="relative h-full border border-gray-700 rounded-b-md mx-4 mb-4 pt-4 overflow-y-auto no-scrollbar"
+                    class="relative h-full border border-gray-900 rounded-b-md mx-4 mb-4 pt-4 overflow-y-auto no-scrollbar"
                 >
                     <HostChat
                         :channelId="channelId"

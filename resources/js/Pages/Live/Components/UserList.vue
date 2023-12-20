@@ -1,7 +1,11 @@
 <script setup>
-const props = defineProps(["visible","viewers","broadcasters","channelCount"]);
+const props = defineProps([
+    "visible",
+    "viewers",
+    "broadcasters",
+    "channelCount",
+]);
 import UserItem from "./UserItem.vue";
-
 </script>
 
 <template>
@@ -13,9 +17,9 @@ import UserItem from "./UserItem.vue";
             <div class="flex flex-row justify-between items-center">
                 <div class="text-xl font-semibold text-gray-100">
                     Broadcasters
-                </div>            
+                </div>
             </div>
-            <div>
+            <div class="pt-4">
                 <div
                     id="users"
                     v-for="user in props.broadcasters"
@@ -24,24 +28,24 @@ import UserItem from "./UserItem.vue";
                 >
                     <UserItem :user="user" />
                 </div>
-
             </div>
         </div>
         <div class="">
             <div class="flex flex-row justify-between items-center">
                 <div class="text-xl font-semibold text-gray-100">
-                    Viewers ({{props.channelCount}})
+                    Viewers ({{ props.channelCount }})
                 </div>
-                
             </div>
-             <div
+            <div class="pt-4">
+                <div
                     id="users"
                     v-for="user in props.viewers"
                     :key="user.id"
-                    class="w-full flex items-center mb-4 mx-4"
+                    class="w-full flex items-center"
                 >
                     <UserItem :user="user" />
                 </div>
+            </div>
         </div>
     </div>
 </template>
