@@ -244,17 +244,27 @@ const stopLocalTrack = async () => {
 client.on("user-published", handleUserPublished);
 client.on("user-unpublished", handleUserUnpublished);
 
+const dynamicClasses = () => {
+    const dynamicDiv = document.querySelector(
+        '[id^="agora-video-player-track-cam-"]'
+    );
+    if (dynamicDiv) {
+        console.log("dynamicDiv", dynamicDiv);
+        dynamicDiv.style.borderRadius = "0.5rem";
+    } else {
+        console.log("dynamicDiv not found");
+    }
+};
+
 onBeforeUnmount(() => {
     leave();
 });
 
 onMounted(async () => {
-    // access cam and mic
-
     await accessDevices();
     await playLocalTrack();
     await getDevices();
-    setIsLoading();
+    dynamicClasses();
 });
 </script>
 
@@ -269,12 +279,16 @@ onMounted(async () => {
         @newVideoDevice="selectedVideoDevice = $event"
     />
     <div
-        class="relative w-full h-full bg-gray-900 rounded-lg text-2xl font-bold flex justify-center items-center shadow-md shadow-black"
+        class="relative w-full h-full bg-gray-900 text-2xl font-bold flex justify-center items-center shadow-md shadow-black border rounded-lg"
+        :class="{
+            'border-gray-600': !isBroadcasting,
+            'border-red-500': isBroadcasting,
+        }"
     >
         <div
             id="remote-player"
             style="display: contents"
-            class="w-full h-full rounded-lg relative"
+            class="w-full h-full relative"
         >
             <div
                 class="absolute w-full h-[calc(100%-96px)] z-20 flex flex-col-reverse gap-5 no-scrollbar overflow-y-scroll mt-12 px-4 bg-gradient-to-b from-transparent to-gray-900/80 via-gray-900/20"
@@ -329,7 +343,7 @@ onMounted(async () => {
             </div>
         </div>
         <div
-            class="absolute top-0 left-0 w-full xs:h-12 md:h-12 bg-gray-900/40"
+            class="absolute top-0 left-0 w-full xs:h-12 md:h-12 bg-gray-900/40 rounded-t"
         >
             <div
                 class="absolute top-3 left-4 font-logo flex flex-row text-sm md:text-lg"
@@ -339,14 +353,7 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div class="absolute xs:top-2 md:top-3 right-4">
-            <span
-                v-if="isBroadcasting"
-                class="rounded-2xl px-6 py-1.5 bg-red-600 font-medium text-white xs:text-sm md:text-lg"
-                :class="{ 'animate-pulse': showPulse }"
-                >LIVE</span
-            >
-        </div>
+        <div class="absolute xs:top-2 md:top-3 right-4"></div>
         <div
             class="w-full h-12 flex flex-row justify-between items-center absolute bottom-0 rounded-b-lg z-2"
             :class="{
@@ -448,6 +455,6 @@ onMounted(async () => {
 <style>
 .agora_video_player {
     object-fit: cover !important;
-    border-radius: 0.5rem;
+    border: 0px;
 }
 </style>

@@ -6,7 +6,7 @@ import {
 import { ref, onBeforeUnmount, onMounted, defineExpose, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
-import ChatMessage from "./ChatMessage.vue";
+import ChatMessage from "../ChatMessage.vue";
 
 const props = defineProps(["channelId", "visible"]);
 const emit = defineEmits(["channelCount", "sysMessage", "chatMembersUpdate"]);

@@ -4,7 +4,7 @@ import { onMounted, onUnmounted, onBeforeUnmount, ref } from "vue";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import ViewerChat from "./Components/ViewerChat.vue";
 import TipModal from "./Components/TipModal.vue";
-import ChooseDevices from "./Components/ChooseDevices.vue";
+import ChooseDevices from "./Components/Host/ChooseDevices.vue";
 import Notification from "@/Pages/Components/Notification.vue";
 
 import {

@@ -3,23 +3,19 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { usePage, Head, router } from "@inertiajs/vue3";
 import { TransitionRoot, TransitionChild } from "@headlessui/vue";
 import { Bars2Icon } from "@heroicons/vue/24/solid";
-import HostChat from "./Components/HostChat.vue";
+import HostChat from "./Components/Host/HostChat.vue";
 import UserList from "./Components/UserList.vue";
 import AdminPanel from "./Components/AdminPanel.vue";
-import HostBroadcast from "./Components/HostBroadcast.vue";
+import HostBroadcast from "./Components/Host/HostBroadcast.vue";
 import TipUser from "./Components/TipUser.vue";
 import JoinRequest from "../Components/JoinRequest.vue";
+import HostStatsBar from "./Components/Host/HostStatsBar.vue";
 
 const page = usePage();
 const rightSidebar = ref("chat");
 const channelCount = ref(0);
 const channelViews = ref(0);
-const streamStartTime = Date();
-const streamTime = ref("0:00");
-const streamTips = ref("$0");
-const streamLikes = ref(0);
 const channelId = page.props.channelId;
-const statsBar = ref(true);
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
@@ -76,22 +72,6 @@ const scrollToBottom = () => {
     container.scrollTop = container.scrollHeight;
 };
 
-const updateStreamTime = () => {
-    const now = Date();
-    const diff = Math.abs(new Date(now) - new Date(streamStartTime));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const rawMinutes = Math.floor(diff / 1000 / 60);
-    const rawSeconds = Math.floor((diff / 1000) % 60);
-
-    const formatTimeComponent = (component) => {
-        return component < 10 ? `0${component}` : component;
-    };
-
-    const minutes = formatTimeComponent(rawMinutes);
-    const seconds = formatTimeComponent(rawSeconds);
-    streamTime.value = `${hours}:${minutes}:${seconds}`;
-};
-
 const setPageLoading = () => {
     setTimeout(() => {
         pageLoading.value = false;
@@ -128,84 +108,6 @@ const copyBroadcasters = () => {
     });
     broadcasters.value = [...tmp];
 };
-
-const shouldShowItem = (item) => {
-    if (item.mobile) {
-        return true;
-    }
-    return window.innerWidth > 768;
-};
-
-const streamStats = ref([
-    {
-        id: 1,
-        title: "Viewers",
-        stat: channelCount.value,
-    },
-    {
-        id: 2,
-        title: "Tips",
-        stat: streamTips.value,
-    },
-    {
-        id: 3,
-        title: "Stream Time",
-        stat: streamTime.value,
-    },
-    {
-        id: 4,
-        title: "Likes",
-        stat: streamLikes.value,
-    },
-    {
-        id: 5,
-        title: "Total Views",
-        stat: channelViews.value,
-    },
-]);
-
-//create a computed to create filteredStreamStats
-const filteredStreamStats = computed(() => {
-    return streamStats.value.filter((item) => {
-        return shouldShowItem(item);
-    });
-});
-//update the frontend every 5 seconds
-setInterval(() => {
-    updateStreamTime();
-    streamStats.value = [
-        {
-            id: 1,
-            title: "Viewers",
-            stat: channelCount.value,
-            mobile: true,
-        },
-        {
-            id: 2,
-            title: "Tips",
-            stat: streamTips.value,
-            mobile: true,
-        },
-        {
-            id: 3,
-            title: "Stream Time",
-            stat: streamTime.value,
-            mobile: false,
-        },
-        {
-            id: 4,
-            title: "Likes",
-            stat: streamLikes.value,
-            mobile: true,
-        },
-        {
-            id: 5,
-            title: "Total Views",
-            stat: channelViews.value,
-            mobile: false,
-        },
-    ];
-}, 1000);
 
 const deleteStream = () => {
     router.delete("/live", {
@@ -348,40 +250,7 @@ const tipList = [
                 @endStream="deleteStream"
             />
             <div class="flex flex-col w-full bg-gray-900 rounded-lg">
-                <div
-                    class="flex w-full justify-center items-center xs:col-span-3 md:col-span-5"
-                    :class="{
-                        'my-2': !statsBar,
-                        'my-2': statsBar,
-                    }"
-                >
-                    <Bars2Icon
-                        @click="statsBar = !statsBar"
-                        class="w-24 h-6 text-gray-100"
-                    />
-                </div>
-                <div v-show="statsBar">
-                    <div
-                        class="w-full bg-gray-900 rounded-lg text-2xl font-bold grid grid-cols-3 md:grid-cols-5 gap-2 items-center px-6 pb-4 shadow-md shadow-black"
-                    >
-                        <div
-                            v-for="item in filteredStreamStats"
-                            :key="item.id"
-                            class=""
-                        >
-                            <div
-                                class="flex flex-col justify-center items-center bg-gray-950 shadow-md shadow-black rounded-lg p-4 w-full transform transition-transform hover:translate-y-1"
-                            >
-                                <div class="text-2xl font-medium text-gray-100">
-                                    {{ item.stat }}
-                                </div>
-                                <div class="text-lg font-medium text-gray-500">
-                                    {{ item.title }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <HostStatsBar />
             </div>
             <div
                 class="w-full h-60 rounded-lg text-2xl font-bold hidden md:flex justify-center items-center flex-row gap-4 shadow-md shadow-black"
@@ -389,7 +258,7 @@ const tipList = [
                 <div
                     class="w-full h-60 rounded-lg flex flex-col p-4 bg-gray-900 gap-2"
                 >
-                    <!-- Graph showing total users in chat per minute -->
+                    <div class="text-white">Tip Goals go here</div>
                 </div>
 
                 <div

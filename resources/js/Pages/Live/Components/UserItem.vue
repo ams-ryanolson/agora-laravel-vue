@@ -16,16 +16,14 @@ const closeUserItemMenu = () => {
 <template>
     <div class="flex w-full pb-3">
         <img
-            :src="user.avatar"
-            class="w-12 h-12 rounded-full mr-4 border-2 border-sky-700"
+            :src="'/storage/-' + user.avatar"
+            class="w-10 h-10 rounded-full mr-4 border-2 border-sky-700 my-auto"
         />
         <div class="flex-1">
             <div class="text-gray-200 font-medium mb-1">
                 {{ user.name }}
             </div>
-            <div class="text-gray-400 mb-1 text-sm font-medium">
-                @{{ user.name }}
-            </div>
+            <div class="text-gray-400 mb-1 text-xs">@{{ user.name }}</div>
         </div>
         <div class="flex items-center ml-auto relative">
             <!-- Use ml-auto to push the dots to the right -->
