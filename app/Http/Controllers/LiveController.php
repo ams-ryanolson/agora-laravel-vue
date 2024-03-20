@@ -19,13 +19,34 @@ class LiveController extends Controller
      */
     public function index()
     {
-        $liveStreams = Live::where('deleted_at', null)
+        //Create new RTM token for Vue to access global index channel
+        // for pub/sub information about new channels being created
+        $user = auth()->user();
+        // Agora Api service for querying "get all channels": 
+        $agoraApi = new AgoraApiService();
+        // new RTM token with scope on index page: 
+        $rtmToken = AgoraTokenService::buildRtmToken($user->id, 3600);
+        $APPID = config('agora.app_id');
+
+        //Query DB Index Live
+        $liveStreamsDB = Live::where('deleted_at', null)
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
 
+        //make API call to get channel list
+        $agoraLiveChannels = $agoraApi->getAllActiveStreams($APPID);
+
+        //filter DB array for matching livestreams from Agora REST API:
+        $liveStreams = $this->filterLiveStreams($liveStreamsDB, $agoraLiveChannels);
+
+        //TODO: add "user count" from API res to $liveStreams + add User count to UI:
+        //TODO: Add local map as a cache or implement DB Cache (Redis)
+
         return Inertia::render('Live/Index', [
             'liveStreams' => $liveStreams,
+            'appId' => config('agora.app_id'),
+            'rtmToken' => $rtmToken,
         ]);
     }
 
@@ -156,5 +177,40 @@ class LiveController extends Controller
         $mediaGateway = $agoraApi->createMediaGateway($userId, $region, $appId);
 
         return $mediaGateway;
+    }
+
+    private function filterLiveStreams($databaseArray, $channelsObject)
+    {
+        // Decode the JSON strings:
+        $databaseArray = json_decode($databaseArray, true);
+        $channelsObject = json_decode($channelsObject, true);
+
+        // Extract channels array from the channelsObject:
+        $channelsArray = $channelsObject['data']['channels'];
+
+        // Initialize an array to store matching UUIDs:
+        $matchingUUIDs = [];
+
+        // Iterate over the database array to find matching UUIDs:
+        foreach ($databaseArray as $key => $item) {
+            // Check if the 'uuid' key exists in the item:
+            if (isset($item['uuid'])) {
+                $uuid = $item['uuid'];
+                // Check if the UUID exists in the channels array:
+                foreach ($channelsArray as $channel) {
+                    if ($channel['channel_name'] == $uuid) {
+                        $matchingUUIDs[] = $uuid;
+                    }
+                }
+            }
+        }
+
+        // Filter the database array to keep only the items with matching UUIDs
+        $databaseArray = array_filter($databaseArray, function ($item) use ($matchingUUIDs) {
+            return in_array($item['uuid'], $matchingUUIDs);
+        });
+
+        //return modified/filtered DB array:
+        return $databaseArray;
     }
 }
