@@ -15,7 +15,9 @@ const page = usePage();
 const rightSidebar = ref("chat");
 const channelCount = ref(0);
 const channelViews = ref(0);
-const channelId = page.props.channelId;
+const channelId = ref(page.props.channelId);
+const audioOnly = page.props.audioOnly;
+const max_broadcasters = audioOnly ? 10 : 4
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
@@ -24,6 +26,12 @@ const pageLoading = ref(true);
 const broadcasterUIDs = ref([]);
 const broadcasters = ref([]);
 const viewers = ref([]);
+const notificationData = ref({
+    message: "You Got This!",
+    description: "You are now live!",
+});
+const notificationType = ref("error");
+const notificationOpen = ref(false);
 
 const rightSidebarTop = [
     {
@@ -57,7 +65,20 @@ const sysMessage = (json, peerId) => {
     }
 };
 
+const closeNotification = () => {
+    notificationOpen.value = false;
+};
+
 const approveJoinRequest = (peerId) => {
+    if (broadcasters.length + 1>= max_broadcasters) {
+        notificationData.value = {
+            message: "Too Many Broadcasters",
+            description: "Maximum number of broadcasters reached",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        return;
+    }
     rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
     inviteToStage.value = false;
 };
@@ -68,6 +89,15 @@ const ignoreJoinRequest = (peerId) => {
 };
 
 const inviteAudience = async (user) => {
+    if (broadcasters.length + 1>= max_broadcasters) {
+        notificationData.value = {
+            message: "Too Many Broadcasters",
+            description: "Maximum number of broadcasters reached",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        return;
+    }
     if (user != null) {
         rtmChat.value.$.exposed.sendPermissionRequest(user.id);
     } else {
@@ -271,6 +301,12 @@ const tipList = [
         :show="inviteToStage"
         @approve="approveJoinRequest"
         @ignore="ignoreJoinRequest"
+    />
+    <Notification
+        :type="notificationType"
+        :data="notificationData"
+        :show="notificationOpen"
+        @close="closeNotification"
     />
     <!--suppress HtmlRequiredTitleElement -->
     <Head title="Live" />

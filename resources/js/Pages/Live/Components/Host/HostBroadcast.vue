@@ -29,6 +29,7 @@ const uid = ref(0);
 const appId = ref(page.props.appId);
 const token = ref(page.props.rtcToken);
 const channel = ref(page.props.channelId);
+const audioOnly = page.props.audioOnly;
 const isVideoMuted = ref(false);
 const isAudioMuted = ref(false);
 const isBroadcasting = ref(false);
@@ -97,7 +98,9 @@ watch(selectedAudioDevice, async () => {
 });
 
 watch(selectedVideoDevice, async () => {
-    localTracks.value[1].setDevice(selectedVideoDevice._value);
+    if (!audioOnly) {
+        localTracks.value[1].setDevice(selectedVideoDevice._value);
+    }
 
     //await stopLocalTrack();
     //await unpublish();
@@ -109,7 +112,7 @@ const subscribe = async (user, mediaType) => {
     const uid = user.uid;
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
-    if (mediaType === "video") {
+    if (!audioOnly && mediaType === "video") {
         user.videoTrack.play(`remote-player`);
     }
     if (mediaType === "audio") {
@@ -235,7 +238,9 @@ const unmuteAudio = async () => {
 };
 
 const playLocalTrack = async () => {
-    await localTracks.value[1].play("remote-player");
+    if (!audioOnly) {
+        await localTracks.value[1].play("remote-player");
+    }
 };
 
 const stopLocalTrack = async () => {
@@ -244,6 +249,7 @@ const stopLocalTrack = async () => {
 client.on("user-published", handleUserPublished);
 client.on("user-unpublished", handleUserUnpublished);
 
+// Suggestion: Display user avatar if video is off instead of video player
 const dynamicClasses = () => {
     const dynamicDiv = document.querySelector(
         '[id^="agora-video-player-track-cam-"]'
@@ -362,7 +368,7 @@ onMounted(async () => {
             }"
         >
             <div class="flex flex-row gap-6 px-4 items-center">
-                <div>
+                <div v-if="!audioOnly">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 576 512"

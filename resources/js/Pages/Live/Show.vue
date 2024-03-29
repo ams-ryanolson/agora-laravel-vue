@@ -27,6 +27,7 @@ const host_uid = ref(null);
 const channelId = ref(page.props.channelId);
 const appId = ref(page.props.appId);
 const token = ref(page.props.rtcToken);
+const audioOnly = page.props.audioOnly;
 const localTracks = ref([]);
 const remoteUsers = ref({});
 const isJoined = ref(false);
@@ -78,7 +79,7 @@ const subscribe = async (user, mediaType) => {
 
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
-    if (mediaType === "video") {
+    if (!audioOnly && mediaType === "video") {
         user.videoTrack.play(`remote-player`);
     }
     if (mediaType === "audio") {
@@ -179,7 +180,9 @@ const unmuteAudio = async () => {
 };
 
 const playLocalTrack = async () => {
-    await localTracks.value[1].play("remote-player");
+    if (!audioOnly) {
+        await localTracks.value[1].play("remote-player");
+    }
 };
 
 const stopLocalTrack = async () => {
@@ -368,7 +371,7 @@ const tipOptions = [
                     class="w-full h-12 flex flex-row justify-between items-center absolute bottom-0 rounded-b-lg z-2"
                 >
                     <div class="flex flex-row gap-6 px-4 items-center">
-                        <div>
+                        <div v-if="!audioOnly">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 576 512"

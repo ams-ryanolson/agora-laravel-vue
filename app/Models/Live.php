@@ -19,10 +19,12 @@ class Live extends Model
         'cover',
         'privacy',
         'tip_options',
+        'audio_only',
     ];
 
     protected $casts = [
         'tip_options' => 'array',
+        'audio_only' => 'boolean'
     ];
 
     public function user()

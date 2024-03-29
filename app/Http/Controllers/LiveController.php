@@ -56,6 +56,7 @@ class LiveController extends Controller
             'appId' => config('agora.app_id'),
             'rtcToken' => $rtcToken,
             'rtmToken' => $rtmToken,
+            'audioOnly' => $live->audio_only,
         ]);
         }
 
@@ -78,6 +79,7 @@ class LiveController extends Controller
             ["id" => 5, "name" => "Custom Tip", "price" => "Custom"]
         ];
         $tipsEncoded = json_encode($tipOptions);
+        $audioOnly = $request->audioOnly;
 
         // $coverPhoto = $this->storeCoverPhoto($request, $uuid);
 
@@ -88,6 +90,7 @@ class LiveController extends Controller
             'privacy' => $privacy,
             'cover' => 'https://picsum.photos/seed/' . $uuid . '/200/300',
             'tip_options' => $tipsEncoded,
+            'audio_only' => $audioOnly,
 
         ]);
 
@@ -117,6 +120,7 @@ class LiveController extends Controller
             'appId' => config('agora.app_id'),
             'rtcToken' => $rtcToken,
             'rtmToken' => $rtmToken,
+            'audioOnly' => $live->audio_only,
         ]);
 
     }
