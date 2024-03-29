@@ -69,18 +69,21 @@ const closeMessageMenu = () => {
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('reportMessage', message.id, message.text, message.userData.name)"
                     >
                         Report
                     </a>
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('kickUser', message.userData.name)"
                     >
                         Kick
                     </a>
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('banUser', message.userData.name)"
                     >
                         Ban
                     </a>

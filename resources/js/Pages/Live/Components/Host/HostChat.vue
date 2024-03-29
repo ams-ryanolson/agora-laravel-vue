@@ -127,21 +127,22 @@ const getChannelCount = async () => {
 };
 
 const sendMessage = () => {
-    const userMessage = {
-        id: null,
-        text: message.value,
-        userData: userData,
-    };
     if (message.value === "") {
         return;
     }
+
+    const userMessage = {
+        id: Date.now() + Math.random().toString(6).substr(2, 9),
+        text: message.value,
+        userData: userData,
+    };
 
     if (rtmChannel) {
         rtmChannel
             .sendMessage({ text: JSON.stringify(userMessage) })
             .then(() => {
                 messages.value.push({
-                    id: Date.now() + Math.random().toString(6).substr(2, 9),
+                    id:  userMessage.id,
                     text: message.value,
                     userData: userData,
                 });
