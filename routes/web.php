@@ -17,6 +17,7 @@ use App\Http\Controllers\LiveController;
 |
 */
 Route::post('/live/create-token', [LiveController::class, 'createMediaGatewayToken']);
+Route::post('/live/kick-user', [LiveController::class, 'kickBanUser']);
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

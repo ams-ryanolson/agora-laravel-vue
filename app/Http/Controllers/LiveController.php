@@ -157,4 +157,17 @@ class LiveController extends Controller
 
         return $mediaGateway;
     }
+
+    public function kickBanUser(Request $request)
+    {
+        $channelId = $request->channelId;
+        $userId = $request->userId;
+        $appId = $request->appId;
+        $timeInSeconds = $request->timeInSeconds;
+
+        $agoraApi = new AgoraApiService();
+        $response = $agoraApi->kickBanUser($userId, $channelId, $appId, $timeInSeconds);
+
+        return $response;
+    }
 }

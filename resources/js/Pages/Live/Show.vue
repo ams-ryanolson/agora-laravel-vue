@@ -1,6 +1,6 @@
 <script setup>
-import { usePage, Link, Head } from "@inertiajs/vue3";
-import { onMounted, onUnmounted, onBeforeUnmount, ref } from "vue";
+import { usePage, Link, Head, router } from "@inertiajs/vue3";
+import { onMounted, onUnmounted, onBeforeUnmount, ref, provide } from "vue";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import ViewerChat from "./Components/ViewerChat.vue";
 import TipModal from "./Components/TipModal.vue";
@@ -53,6 +53,7 @@ const notificationOpen = ref(false);
 const join = async () => {
     client.on("user-published", handleUserPublished);
     client.on("user-unpublished", handleUserUnpublished);
+    client.on("connection-state-change", handleConnectionStateChange);
     await client.join(
         appId.value,
         channelId.value,
@@ -64,6 +65,7 @@ const join = async () => {
 const leave = async () => {
     client.leave();
     isBroadcasting.value = false;
+    router.visit("/live");
 };
 
 //leave
@@ -90,6 +92,32 @@ const handleUserPublished = (user, mediaType) => {
 
 const handleUserUnpublished = (user, mediaType) => {
     console.log('"User Unpublished" event for remote users is triggered');
+};
+
+const handleConnectionStateChange = (newState, currentState, reason) => {
+    console.log("Connection state changed to " + newState + " from " + currentState + " reason: " + reason);
+
+    // since kick and ban is the same API but with different timeInSeconds parameter, it's difficult to differentiate in messaging
+    // what you could probably do is create a state in a parent, and update that state on the Kick or Ban button click to display something different here
+    if (reason == "UID_BANNED") {
+        notificationData.value = {
+            message: "You have been removed from the room.",
+            description: "Taking you back to live streams...",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+
+        setTimeout(() => {
+            router.visit("/live");
+        }, 5000);
+    } else if (newState === "DISCONNECTED") {
+        notificationData.value = {
+            message: "You have been disconnected from the room.",
+            description: "Please refresh or rejoin.",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+    }
 };
 
 const closeChooseDevices = () => {
@@ -188,6 +216,12 @@ const sysMessage = (json, peerId) => {
         notificationType.value = "info";
         notificationOpen.value = true;
         endLive();
+    } else if (json.message = "toggleMute") {
+        if (isAudioMuted.value == false) {
+            muteAudio();
+        } else {
+            unmuteAudio();
+        }
     }
 };
 

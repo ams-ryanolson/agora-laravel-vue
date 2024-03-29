@@ -213,6 +213,25 @@ const sendRemoveAudience = (peerId) => {
     }
 };
 
+const toggleMute = (peerId) => {
+    const systemMessage = {
+        message: "toggleMute",
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
 const sendDeleteMessage = (messageId) => {
     const systemMessage = {
         message: "deleteMessage",
@@ -236,7 +255,7 @@ const sendDeleteMessage = (messageId) => {
     }
 };
 
-defineExpose({ sendPermissionResponse, sendPermissionRequest, sendRemoveAudience });
+defineExpose({ sendPermissionResponse, sendPermissionRequest, sendRemoveAudience, toggleMute });
 
 onBeforeUnmount(() => {
     rtmChannel.leave();

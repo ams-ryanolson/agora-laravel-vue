@@ -49,6 +49,30 @@ class AgoraApiService
         return $response->getBody()->getContents();
     }
 
+    public function kickBanUser($userId, $channelId, $appId, $timeInSeconds)
+    {
+        $response = $this->client->post("dev/v1/kicking-rule", [
+            'json' => [
+                "appid" => $appId,
+                "cname" => $channelId,
+                "uid" => $userId,
+                "time_in_seconds" => $timeInSeconds,
+                "privileges" => [
+                    "join_channel",
+                    "publish_audio",
+                    "publish_video"
+                ]
+            ]
+        ]);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new \Exception('Failed to kick/ban user');
+        }
+
+        // Handle the response as needed
+        return $response->getBody()->getContents();
+    }
+
 //    public function createMediaGateway($userId, $region, $appId)
 //    {
 //        $uuid = Uuid::uuid4()->toString();

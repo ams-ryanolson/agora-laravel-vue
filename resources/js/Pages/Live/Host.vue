@@ -85,6 +85,37 @@ const removeAudience = async (user) => {
 }
 provide("removeAudience", removeAudience);
 
+const toggleMuteUser = async (user) => {
+    if (user != null) {
+        rtmChat.value.$.exposed.toggleMute(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+};
+provide("toggleMuteUser", toggleMuteUser);
+
+const kickBanUser = async (user, timeInSeconds) => {
+    try {
+        const response = await axios
+            .post("/live/kick-user", {
+                userId: user.id,
+                channelId: channelId,
+                appId: page.props.appId,
+                timeInSeconds: timeInSeconds,
+            })
+            .then((response) => {
+                console.log(response.data);
+            });
+
+        // Now you can handle the response as needed
+    } catch (error) {
+        // Handle errors here
+        console.error("Error calling kick-user endpoint:", error);
+    }
+};
+provide("kickBanUser", kickBanUser);
+
+
 const scrollToBottom = () => {
     const container = document.getElementById("messagesContainer");
     container.scrollTop = container.scrollHeight;
