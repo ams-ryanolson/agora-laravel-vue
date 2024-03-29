@@ -34,9 +34,9 @@ class AgoraApiService
         $response = $this->client->post("{$region}/v1/projects/{$appId}/rtls/ingress/streamkeys", [
             'json' => [
                 'settings' => [
-                    "channel" => $userId,
-                    "uid" => $userId,
-                    "expiresAfter" => 30,
+                    "channel" => strval($userId),
+                    "uid" => strval($userId),
+                    "expiresAfter" => 3600,
                 ]
             ]
         ]);

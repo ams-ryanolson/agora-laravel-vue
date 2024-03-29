@@ -145,8 +145,7 @@ class LiveController extends Controller
         //
     }
 
-    //private functions
-    private function createMediaGatewayToken(Request $request)
+    public function createMediaGatewayToken(Request $request)
     {
         $userId = $request->userId;
         $region = $request->region;
