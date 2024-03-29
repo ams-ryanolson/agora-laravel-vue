@@ -137,6 +137,26 @@ onBeforeUnmount(() => {
     rtmClient.logout();
 });
 
+const sendPermissionResponse = (peerId, response) => {
+    const systemMessage = {
+        message: "permissionResponse",
+        response: response,
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
 const sendPermissionRequest = (peerId) => {
     const systemMessage = {
         message: "permissionRequest",
@@ -162,7 +182,7 @@ const sysMessage = (json, peerId) => {
     }
 };
 
-defineExpose({ sendPermissionRequest });
+defineExpose({ sendPermissionResponse, sendPermissionRequest });
 </script>
 
 <template>

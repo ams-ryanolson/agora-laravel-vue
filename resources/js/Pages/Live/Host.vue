@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, provide, ref } from "vue";
 import { usePage, Head, router } from "@inertiajs/vue3";
 import { TransitionRoot, TransitionChild } from "@headlessui/vue";
 import { Bars2Icon } from "@heroicons/vue/24/solid";
@@ -66,6 +66,15 @@ const ignoreJoinRequest = (peerId) => {
     rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
     inviteToStage.value = false;
 };
+
+const inviteAudience = async (user) => {
+    if (user != null) {
+        rtmChat.value.$.exposed.sendPermissionRequest(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+}
+provide("inviteAudience", inviteAudience);
 
 const scrollToBottom = () => {
     const container = document.getElementById("messagesContainer");

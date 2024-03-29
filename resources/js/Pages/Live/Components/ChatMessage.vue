@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
+// TODO : pass in prop to indicate self user, if is_self, don't show menu options
 const props = defineProps({
     message: Object,
     host: Boolean,

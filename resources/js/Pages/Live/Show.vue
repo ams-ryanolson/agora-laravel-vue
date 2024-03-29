@@ -6,6 +6,7 @@ import ViewerChat from "./Components/ViewerChat.vue";
 import TipModal from "./Components/TipModal.vue";
 import ChooseDevices from "./Components/Host/ChooseDevices.vue";
 import Notification from "@/Pages/Components/Notification.vue";
+import InviteRequest from "../Components/InviteRequest.vue";
 
 import {
     CogIcon,
@@ -29,6 +30,8 @@ const token = ref(page.props.rtcToken);
 const localTracks = ref([]);
 const remoteUsers = ref({});
 const isJoined = ref(false);
+const inviteData = ref(null);
+const invitedToStage = ref(false);
 const openTipModal = ref(false);
 const openChooseDevices = ref(false);
 const isVideoMuted = ref(false);
@@ -158,7 +161,15 @@ const stopLocalTrack = async () => {
 const rtmChat = ref();
 
 const sysMessage = (json, peerId) => {
-    if (json.message == "permissionResponse") {
+    if (json.message == "permissionRequest") {
+        inviteData.value = {
+            peerId: peerId,
+            message: "Permission Request",
+            description: json.userData.name + " invites you to go live.",
+        };
+        invitedToStage.value = true;
+    }
+    else if (json.message == "permissionResponse") {
         if (json.response == "OK") {
             prepareGoLive();
         } else {
@@ -170,6 +181,17 @@ const sysMessage = (json, peerId) => {
             notificationOpen.value = true;
         }
     }
+};
+
+const approveInviteRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
+    prepareGoLive();
+    invitedToStage.value = false;
+};
+
+const rejectInviteRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
+    invitedToStage.value = false;
 };
 
 const closeNotification = () => {
@@ -259,6 +281,12 @@ const tipOptions = [
 
 <template>
     <!--suppress HtmlRequiredTitleElement -->
+    <InviteRequest
+        :data="inviteData"
+        :show="invitedToStage"
+        @approve="approveInviteRequest"
+        @ignore="rejectInviteRequest"
+    />
     <Head title="Live" />
 
     <Notification

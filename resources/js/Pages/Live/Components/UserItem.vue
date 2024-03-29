@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
 const props = defineProps({
@@ -11,6 +11,9 @@ const userItemMenu = ref(false);
 const closeUserItemMenu = () => {
     userItemMenu.value = !userItemMenu.value;
 };
+
+const inviteAudience = inject("inviteAudience");
+
 </script>
 
 <template>
@@ -58,6 +61,7 @@ const closeUserItemMenu = () => {
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="inviteAudience(user)"
                     >
                         Invite
                     </a>
