@@ -128,11 +128,12 @@ const copyBroadcasters = () => {
 };
 
 const deleteStream = () => {
-    router.delete("/live", {
+    router.delete("/live.destroy", {
         data: {
-            uuid: page.props.live.uuid,
+            uuid: channelId,
         },
     });
+    // TODO/Suggestion: Copy inviteAudience/removeAudience pattern above and trigger make audience members navigate to home screen when this happens
 };
 
 onBeforeUnmount(() => {

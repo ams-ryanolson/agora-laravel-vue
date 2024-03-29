@@ -140,9 +140,10 @@ class LiveController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Live $live)
+    public function destroy($uuid)
     {
-        //
+        Live::where('uuid', $uuid)->delete();
+        return redirect()->route('live.index');
     }
 
     public function createMediaGatewayToken(Request $request)
