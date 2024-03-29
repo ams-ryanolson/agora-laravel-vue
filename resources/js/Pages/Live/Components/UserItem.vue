@@ -2,8 +2,10 @@
 import { ref, inject } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
+// TODO : pass in host id so the options on an user are not shown for the host
 const props = defineProps({
     user: Object,
+    isBroadcaster: Boolean,
 });
 
 const userItemMenu = ref(false);
@@ -13,6 +15,7 @@ const closeUserItemMenu = () => {
 };
 
 const inviteAudience = inject("inviteAudience");
+const removeAudience = inject("removeAudience");
 
 </script>
 
@@ -58,12 +61,19 @@ const inviteAudience = inject("inviteAudience");
                     >
                         Mute
                     </a>
-                    <a
+                    <a v-if="!isBroadcaster"
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
                         @click="inviteAudience(user)"
                     >
-                        Invite
+                        Invite to Stage
+                    </a>
+                    <a v-else
+                        href="#"
+                        class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="removeAudience(user)"
+                        >
+                        Remove from Stage
                     </a>
                 </div>
             </div>

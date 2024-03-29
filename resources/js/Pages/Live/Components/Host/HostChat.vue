@@ -3,7 +3,7 @@ import {
     EllipsisVerticalIcon,
     PaperAirplaneIcon,
 } from "@heroicons/vue/24/outline";
-import { ref, onBeforeUnmount, onMounted, defineExpose, watch } from "vue";
+import { ref, onBeforeUnmount, onMounted, defineExpose } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "../ChatMessage.vue";
@@ -194,6 +194,25 @@ const sendPermissionRequest = (peerId) => {
     }
 };
 
+const sendRemoveAudience = (peerId) => {
+    const systemMessage = {
+        message: "removeAudience",
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
 const sendDeleteMessage = (messageId) => {
     const systemMessage = {
         message: "deleteMessage",
@@ -217,7 +236,7 @@ const sendDeleteMessage = (messageId) => {
     }
 };
 
-defineExpose({ sendPermissionResponse, sendPermissionRequest });
+defineExpose({ sendPermissionResponse, sendPermissionRequest, sendRemoveAudience });
 
 onBeforeUnmount(() => {
     rtmChannel.leave();

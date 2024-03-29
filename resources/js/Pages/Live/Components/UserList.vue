@@ -26,7 +26,7 @@ import UserItem from "./UserItem.vue";
                     :key="user.id"
                     class="w-full flex items-center mb-4"
                 >
-                    <UserItem :user="user" />
+                    <UserItem :user="user" :isBroadcaster=true />
                 </div>
             </div>
         </div>

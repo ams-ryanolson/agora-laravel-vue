@@ -180,6 +180,14 @@ const sysMessage = (json, peerId) => {
             notificationType.value = "error";
             notificationOpen.value = true;
         }
+    } else if (json.message == "removeAudience") {
+        notificationData.value = {
+            message: "You have been removed from the stage.",
+            description: "The host removed you from the stage.",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        endLive();
     }
 };
 

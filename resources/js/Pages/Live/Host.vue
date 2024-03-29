@@ -76,6 +76,15 @@ const inviteAudience = async (user) => {
 }
 provide("inviteAudience", inviteAudience);
 
+const removeAudience = async (user) => {
+    if (user != null) {
+        rtmChat.value.$.exposed.sendRemoveAudience(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+}
+provide("removeAudience", removeAudience);
+
 const scrollToBottom = () => {
     const container = document.getElementById("messagesContainer");
     container.scrollTop = container.scrollHeight;
