@@ -65,9 +65,15 @@ onMounted(async () => {
                     chatMembers.value.push(attributes);
                     emit("chatMembersUpdate", chatMembers);
                     getChannelCount();
+                    const systemMessage = {
+                        id: null,
+                        text: attributes.name + " joined the room",
+                        userData: attributes,
+                    };
+                    messages.value.push(systemMessage)
                 } catch (err) {}
             });
-            rtmChannel.on("MemberLeft", (member) => {
+            rtmChannel.on("MemberLeft", async (member) => {
                 console.warn("MemberLeft", member);
                 const indexToRemove = chatMembers.value.findIndex(
                     (element) => element["id"] === member
@@ -79,6 +85,15 @@ onMounted(async () => {
                 console.error("MemberLeft 2", indexToRemove, chatMembers.value);
                 emit("chatMembersUpdate", chatMembers);
                 getChannelCount();
+                const attributes = await rtmClient.getUserAttributes(
+                    member
+                );
+                const systemMessage = {
+                    id: null,
+                    text: attributes.name + " left the room",
+                    userData: attributes,
+                };
+                messages.value.push(systemMessage)
             });
         })
         .catch((err) => {
