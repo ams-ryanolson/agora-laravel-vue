@@ -56,7 +56,7 @@ class LiveController extends Controller
             'appId' => config('agora.app_id'),
             'rtcToken' => $rtcToken,
             'rtmToken' => $rtmToken,
-            'audioOnly' => $live->audio_only,
+            'audioOnly' => $live->audio_only
         ]);
         }
 
@@ -90,7 +90,7 @@ class LiveController extends Controller
             'privacy' => $privacy,
             'cover' => 'https://picsum.photos/seed/' . $uuid . '/200/300',
             'tip_options' => $tipsEncoded,
-            'audio_only' => $audioOnly,
+            'audio_only' => $audioOnly || false,
 
         ]);
 

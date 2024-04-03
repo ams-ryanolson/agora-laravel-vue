@@ -285,7 +285,7 @@ onMounted(async () => {
         @newVideoDevice="selectedVideoDevice = $event"
     />
     <div
-        class="relative w-full h-full bg-gray-900 text-2xl font-bold flex justify-center items-center shadow-md shadow-black border rounded-lg"
+        class="relative w-full aspect-video bg-gray-900 text-2xl font-bold flex flex-col lg:flex-row lg:gap-px justify-center items-center shadow-md shadow-black border"
         :class="{
             'border-gray-600': !isBroadcasting,
             'border-red-500': isBroadcasting,

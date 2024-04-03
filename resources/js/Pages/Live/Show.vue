@@ -96,7 +96,14 @@ const handleUserUnpublished = (user, mediaType) => {
 };
 
 const handleConnectionStateChange = (newState, currentState, reason) => {
-    console.log("Connection state changed to " + newState + " from " + currentState + " reason: " + reason);
+    console.log(
+        "Connection state changed to " +
+            newState +
+            " from " +
+            currentState +
+            " reason: " +
+            reason
+    );
 
     // since kick and ban is the same API but with different timeInSeconds parameter, it's difficult to differentiate in messaging
     // what you could probably do is create a state in a parent, and update that state on the Kick or Ban button click to display something different here
@@ -199,8 +206,7 @@ const sysMessage = (json, peerId) => {
             description: json.userData.name + " invites you to go live.",
         };
         invitedToStage.value = true;
-    }
-    else if (json.message == "permissionResponse") {
+    } else if (json.message == "permissionResponse") {
         if (json.response == "OK") {
             prepareGoLive();
         } else {
@@ -219,7 +225,7 @@ const sysMessage = (json, peerId) => {
         notificationType.value = "info";
         notificationOpen.value = true;
         endLive();
-    } else if (json.message = "toggleMute") {
+    } else if ((json.message = "toggleMute")) {
         if (isAudioMuted.value == false) {
             muteAudio();
         } else {
@@ -363,7 +369,7 @@ const tipOptions = [
                 <div
                     id="remote-player"
                     style="display: contents"
-                    class="w-full h-full rounded-lg"
+                    class="w-full aspect-video rounded-lg"
                 ></div>
 
                 <div
