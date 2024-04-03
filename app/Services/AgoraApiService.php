@@ -49,6 +49,13 @@ class AgoraApiService
         return $response->getBody()->getContents();
     }
 
+    public function getAllActiveStreams($appId)
+    {
+        $APPID = config('agora.app_id');
+        $response = $this->client->get("dev/v1/channel/$APPID/");
+        return $response->getBody()->getContents();
+    }
+
 //    public function createMediaGateway($userId, $region, $appId)
 //    {
 //        $uuid = Uuid::uuid4()->toString();
