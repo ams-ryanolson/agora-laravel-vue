@@ -55,6 +55,7 @@ const join = async () => {
     client.on("user-published", handleUserPublished);
     client.on("user-unpublished", handleUserUnpublished);
     client.on("connection-state-change", handleConnectionStateChange);
+    client.on("user-left", handleUserLeft);
     await client.join(
         appId.value,
         channelId.value,
@@ -64,6 +65,9 @@ const join = async () => {
 };
 
 const leave = async () => {
+    if (isBroadcasting.value == true) {
+       await endLive();
+    }
     client.leave();
     isBroadcasting.value = false;
     router.visit("/live");
@@ -87,12 +91,21 @@ const subscribe = async (user, mediaType) => {
     }
 };
 
+const handleUserLeft = (user, reason) => {
+    console.log('"User Left" event for remote users is triggered', user, reason);
+    console.log(host_uid, user.uid, reason)
+    if (host_uid.value == user.uid && reason === "Quit") {
+        console.log("Host quit");
+        leave();
+    }
+};
+
 const handleUserPublished = (user, mediaType) => {
     subscribe(user, mediaType);
 };
 
 const handleUserUnpublished = (user, mediaType) => {
-    console.log('"User Unpublished" event for remote users is triggered');
+    console.log('"User Unpublished" event for remote users is triggered', user, mediaType);
 };
 
 const handleConnectionStateChange = (newState, currentState, reason) => {
