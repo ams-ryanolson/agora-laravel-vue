@@ -263,6 +263,9 @@ const dynamicClasses = () => {
 };
 
 onBeforeUnmount(() => {
+    if (isBroadcasting.value == true) {
+        unpublish();
+    }
     leave();
 });
 
