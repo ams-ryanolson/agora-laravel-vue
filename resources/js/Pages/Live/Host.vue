@@ -70,7 +70,7 @@ const closeNotification = () => {
 };
 
 const approveJoinRequest = (peerId) => {
-    if (broadcasters.length + 1>= max_broadcasters) {
+    if (broadcasters.value.length + 1>= max_broadcasters) {
         notificationData.value = {
             message: "Too Many Broadcasters",
             description: "Maximum number of broadcasters reached",
@@ -89,7 +89,7 @@ const ignoreJoinRequest = (peerId) => {
 };
 
 const inviteAudience = async (user) => {
-    if (broadcasters.length + 1>= max_broadcasters) {
+    if (broadcasters.value.length + 1>= max_broadcasters) {
         notificationData.value = {
             message: "Too Many Broadcasters",
             description: "Maximum number of broadcasters reached",
