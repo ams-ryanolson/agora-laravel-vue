@@ -121,6 +121,9 @@ const subscribe = async (user, mediaType) => {
 };
 
 const insertBroadcaster = async (uid) => {
+    if (broadcasters.value.includes(uid)) {
+        return;
+    }
     broadcasters.value.push(uid);
     emit("broadcastersUpdate", broadcasters);
 };

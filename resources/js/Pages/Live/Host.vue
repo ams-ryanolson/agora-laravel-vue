@@ -169,11 +169,11 @@ const updateChannelCount = (count) => {
 
 const updateChatMembers = (chatList) => {
     viewers.value = [...chatList.value];
-    copyBroadcasters();
 };
 
 const broadcastersUpdate = (blist) => {
     broadcasterUIDs.value = [...blist.value];
+    console.log("broadcaster updated", broadcasterUIDs.value.length);
     copyBroadcasters();
 };
 
@@ -194,7 +194,6 @@ const deleteStream = () => {
             uuid: channelId,
         },
     });
-    // TODO/Suggestion: Copy inviteAudience/removeAudience pattern above and trigger make audience members navigate to home screen when this happens
 };
 
 onBeforeUnmount(() => {
