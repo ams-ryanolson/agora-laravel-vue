@@ -26,9 +26,17 @@ watchEffect(() => {
 const form = reactive({
     description: "",
     tags: "",
+    audioOnly: null,
     privacy: "Everyone",
     coverPhoto: "",
 });
+
+const setAudioOnly = (audioOnly) => {
+    if (audioOnly == null) {
+        form.audioOnly = false;
+    }
+    form.audioOnly = audioOnly;
+};
 
 const selectPrivacy = (privacy) => {
     form.privacy = privacy;
@@ -302,6 +310,80 @@ const cancel = () => {
                                             />
                                         </div>
                                     </div>
+                                    <Menu
+                                        as="div"
+                                        class="relative inline-block text-left"
+                                    >
+                                        <div>
+                                            <MenuButton
+                                                class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-gray-800 px-3 py-4 text-sm font-medium text-gray-100 shadow-sm ring-1 ring-inset ring-gray-800"
+                                            >
+                                                {{
+                                                    form.audioOnly
+                                                        ? "Audio Only"
+                                                        : "Video Only"
+                                                }}
+                                                <ChevronDownIcon
+                                                    class="-mr-1 h-5 w-5 text-gray-400"
+                                                    aria-hidden="true"
+                                                />
+                                            </MenuButton>
+                                        </div>
+
+                                        <transition
+                                            enter-active-class="transition ease-out duration-100"
+                                            enter-from-class="transform opacity-0 scale-95"
+                                            enter-to-class="transform opacity-100 scale-100"
+                                            leave-active-class="transition ease-in duration-75"
+                                            leave-from-class="transform opacity-100 scale-100"
+                                            leave-to-class="transform opacity-0 scale-95"
+                                        >
+                                            <MenuItems
+                                                class="absolute right-0 z-50 mt-2 w-full origin-top-right rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-900"
+                                            >
+                                                <div class="py-1 space-y-2">
+                                                    <MenuItem
+                                                        v-slot="{ active }"
+                                                    >
+                                                        <a
+                                                            href="#"
+                                                            @click="
+                                                                setAudioOnly(
+                                                                    true
+                                                                )
+                                                            "
+                                                            :class="[
+                                                                active
+                                                                    ? 'bg-sky-600 text-gray-100'
+                                                                    : 'text-gray-100',
+                                                                'block px-4 py-2 text-center',
+                                                            ]"
+                                                            >Audio Only</a
+                                                        >
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        v-slot="{ active }"
+                                                    >
+                                                        <a
+                                                            href="#"
+                                                            @click="
+                                                                setAudioOnly(
+                                                                    false
+                                                                )
+                                                            "
+                                                            :class="[
+                                                                active
+                                                                    ? 'bg-sky-600 text-gray-100'
+                                                                    : 'text-gray-100',
+                                                                'block px-4 py-2 text-center',
+                                                            ]"
+                                                            >Video Only</a
+                                                        >
+                                                    </MenuItem>
+                                                </div>
+                                            </MenuItems>
+                                        </transition>
+                                    </Menu>
 
                                     <div
                                         class="w-full flex flex-row gap-6 justify-between items-center"

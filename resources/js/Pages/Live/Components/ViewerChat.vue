@@ -50,6 +50,12 @@ onMounted(async () => {
         .then(() => {
             rtmChannel.on("ChannelMessage", (messageData) => {
                 const message = JSON.parse(messageData.text);
+                if (message.message == "deleteMessage") {
+                    messages.value = messages.value.filter(
+                        (m) => m.id !== message.messageId
+                    );
+                    return;
+                }
                 messages.value.push(message);
             });
             rtmChannel.on("MemberJoined", (joinData) => {});
@@ -102,6 +108,7 @@ const getChannelCount = async () => {
 
 const sendMessage = () => {
     const userMessage = {
+        id: Date.now() + Math.random().toString(6).substr(2, 9),
         text: message.value,
         userData: userData,
     };
@@ -113,6 +120,7 @@ const sendMessage = () => {
             .sendMessage({ text: JSON.stringify(userMessage) })
             .then(() => {
                 messages.value.push({
+                    id: userMessage.id,
                     text: message.value,
                     userData: userData,
                 });
@@ -128,6 +136,26 @@ onBeforeUnmount(() => {
     rtmChannel.leave();
     rtmClient.logout();
 });
+
+const sendPermissionResponse = (peerId, response) => {
+    const systemMessage = {
+        message: "permissionResponse",
+        response: response,
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
 
 const sendPermissionRequest = (peerId) => {
     const systemMessage = {
@@ -154,7 +182,7 @@ const sysMessage = (json, peerId) => {
     }
 };
 
-defineExpose({ sendPermissionRequest });
+defineExpose({ sendPermissionResponse, sendPermissionRequest });
 </script>
 
 <template>

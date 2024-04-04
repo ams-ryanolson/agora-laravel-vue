@@ -29,6 +29,7 @@ const uid = ref(0);
 const appId = ref(page.props.appId);
 const token = ref(page.props.rtcToken);
 const channel = ref(page.props.channelId);
+const audioOnly = page.props.audioOnly;
 const isVideoMuted = ref(false);
 const isAudioMuted = ref(false);
 const isBroadcasting = ref(false);
@@ -97,7 +98,9 @@ watch(selectedAudioDevice, async () => {
 });
 
 watch(selectedVideoDevice, async () => {
-    localTracks.value[1].setDevice(selectedVideoDevice._value);
+    if (!audioOnly) {
+        localTracks.value[1].setDevice(selectedVideoDevice._value);
+    }
 
     //await stopLocalTrack();
     //await unpublish();
@@ -109,7 +112,7 @@ const subscribe = async (user, mediaType) => {
     const uid = user.uid;
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
-    if (mediaType === "video") {
+    if (!audioOnly && mediaType === "video") {
         user.videoTrack.play(`remote-player`);
     }
     if (mediaType === "audio") {
@@ -118,6 +121,9 @@ const subscribe = async (user, mediaType) => {
 };
 
 const insertBroadcaster = async (uid) => {
+    if (broadcasters.value.includes(uid)) {
+        return;
+    }
     broadcasters.value.push(uid);
     emit("broadcastersUpdate", broadcasters);
 };
@@ -235,7 +241,9 @@ const unmuteAudio = async () => {
 };
 
 const playLocalTrack = async () => {
-    await localTracks.value[1].play("remote-player");
+    if (!audioOnly) {
+        await localTracks.value[1].play("remote-player");
+    }
 };
 
 const stopLocalTrack = async () => {
@@ -244,6 +252,7 @@ const stopLocalTrack = async () => {
 client.on("user-published", handleUserPublished);
 client.on("user-unpublished", handleUserUnpublished);
 
+// Suggestion: Display user avatar if video is off instead of video player
 const dynamicClasses = () => {
     const dynamicDiv = document.querySelector(
         '[id^="agora-video-player-track-cam-"]'
@@ -257,6 +266,9 @@ const dynamicClasses = () => {
 };
 
 onBeforeUnmount(() => {
+    if (isBroadcasting.value == true) {
+        unpublish();
+    }
     leave();
 });
 
@@ -279,7 +291,7 @@ onMounted(async () => {
         @newVideoDevice="selectedVideoDevice = $event"
     />
     <div
-        class="relative w-full h-full bg-gray-900 text-2xl font-bold flex justify-center items-center shadow-md shadow-black border rounded-lg"
+        class="relative w-full aspect-video bg-gray-900 text-2xl font-bold flex flex-col lg:flex-row lg:gap-px justify-center items-center shadow-md shadow-black border"
         :class="{
             'border-gray-600': !isBroadcasting,
             'border-red-500': isBroadcasting,
@@ -362,7 +374,7 @@ onMounted(async () => {
             }"
         >
             <div class="flex flex-row gap-6 px-4 items-center">
-                <div>
+                <div v-if="!audioOnly">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 576 512"

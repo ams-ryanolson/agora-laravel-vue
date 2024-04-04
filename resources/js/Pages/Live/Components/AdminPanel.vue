@@ -27,12 +27,13 @@ const form = reactive({
 });
 
 const createMediaGatewayToken = async () => {
+    console.log("Page:" + page.appId);
     try {
         const response = await axios
-            .post("/live/createmediagatewaytoken", {
+            .post("/live/create-token", {
                 userId: page.auth.user.id,
                 region: "na",
-                appId: page.props.appId,
+                appId: page.appId,
             })
             .then((response) => {
                 console.log(response.data);
@@ -248,22 +249,11 @@ const createMediaGatewayToken = async () => {
                         />
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label for="streamSource" class="text-white font-medium"
-                            >Stream Source</label
-                        >
-                        <input
-                            type="text"
-                            id="streamSource"
-                            v-model="form.rtmpSource"
-                            class="rounded-lg border border-gray-700 bg-gray-800 text-white px-4 py-2"
-                        />
-                    </div>
-                    <div class="flex flex-col gap-2">
                         <button
                             class="rounded-lg border border-gray-700 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2"
                             @click="createMediaGatewayToken"
                         >
-                            Update
+                            Get Stream Key
                         </button>
                     </div>
                 </disclosure-panel>

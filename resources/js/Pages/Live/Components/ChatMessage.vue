@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
+// TODO : pass in prop to indicate self user, if is_self, don't show menu options
 const props = defineProps({
     message: Object,
     host: Boolean,
@@ -24,16 +25,21 @@ const openMessageMenu = () => {
 const closeMessageMenu = () => {
     messageMenu.value = false;
 };
+const isSystemMessage = !props.message.id;
+
 </script>
 
 <template>
     <div class="flex w-full group hover:bg-gray-800 px-2 py-2">
         <img
+            v-if="!isSystemMessage"
             :src="'/storage/' + message.userData.avatar"
             class="w-12 h-12 rounded-full mr-4 border-2 border-sky-700"
         />
         <div class="flex-1">
-            <div class="text-gray-300 font-medium mb-1 text-sm">
+            <div
+                v-if="!isSystemMessage"
+                class="text-gray-300 font-medium mb-1 text-sm">
                 {{ message.userData.name }}
             </div>
             <div
@@ -46,7 +52,7 @@ const closeMessageMenu = () => {
             </div>
         </div>
         <div
-            v-if="host"
+            v-if="host && !isSystemMessage"
             class="relative items-center ml-auto px-6 hidden group-hover:flex cursor-pointer"
             @click="openMessageMenu"
         >
@@ -69,18 +75,21 @@ const closeMessageMenu = () => {
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('reportMessage', message.id, message.text, message.userData.name)"
                     >
                         Report
                     </a>
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('kickUser', message.userData.name)"
                     >
                         Kick
                     </a>
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="emits('banUser', message.userData.name)"
                     >
                         Ban
                     </a>

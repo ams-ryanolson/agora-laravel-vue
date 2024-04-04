@@ -56,6 +56,7 @@ class LiveController extends Controller
             'appId' => config('agora.app_id'),
             'rtcToken' => $rtcToken,
             'rtmToken' => $rtmToken,
+            'audioOnly' => $live->audio_only
         ]);
         }
 
@@ -78,6 +79,7 @@ class LiveController extends Controller
             ["id" => 5, "name" => "Custom Tip", "price" => "Custom"]
         ];
         $tipsEncoded = json_encode($tipOptions);
+        $audioOnly = $request->audioOnly;
 
         // $coverPhoto = $this->storeCoverPhoto($request, $uuid);
 
@@ -88,6 +90,7 @@ class LiveController extends Controller
             'privacy' => $privacy,
             'cover' => 'https://picsum.photos/seed/' . $uuid . '/200/300',
             'tip_options' => $tipsEncoded,
+            'audio_only' => $audioOnly || false,
 
         ]);
 
@@ -117,6 +120,7 @@ class LiveController extends Controller
             'appId' => config('agora.app_id'),
             'rtcToken' => $rtcToken,
             'rtmToken' => $rtmToken,
+            'audioOnly' => $live->audio_only,
         ]);
 
     }
@@ -140,13 +144,13 @@ class LiveController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Live $live)
+    public function destroy($uuid)
     {
-        //
+        Live::where('uuid', $uuid)->delete();
+        return redirect()->route('live.index');
     }
 
-    //private functions
-    private function createMediaGatewayToken(Request $request)
+    public function createMediaGatewayToken(Request $request)
     {
         $userId = $request->userId;
         $region = $request->region;
@@ -156,5 +160,18 @@ class LiveController extends Controller
         $mediaGateway = $agoraApi->createMediaGateway($userId, $region, $appId);
 
         return $mediaGateway;
+    }
+
+    public function kickBanUser(Request $request)
+    {
+        $channelId = $request->channelId;
+        $userId = $request->userId;
+        $appId = $request->appId;
+        $timeInSeconds = $request->timeInSeconds;
+
+        $agoraApi = new AgoraApiService();
+        $response = $agoraApi->kickBanUser($userId, $channelId, $appId, $timeInSeconds);
+
+        return $response;
     }
 }

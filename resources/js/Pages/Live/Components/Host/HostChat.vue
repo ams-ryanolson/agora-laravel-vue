@@ -3,7 +3,7 @@ import {
     EllipsisVerticalIcon,
     PaperAirplaneIcon,
 } from "@heroicons/vue/24/outline";
-import { ref, onBeforeUnmount, onMounted, defineExpose, watch } from "vue";
+import { ref, onBeforeUnmount, onMounted, defineExpose } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import AgoraRTM from "agora-rtm-sdk";
 import ChatMessage from "../ChatMessage.vue";
@@ -65,9 +65,15 @@ onMounted(async () => {
                     chatMembers.value.push(attributes);
                     emit("chatMembersUpdate", chatMembers);
                     getChannelCount();
+                    const systemMessage = {
+                        id: null,
+                        text: attributes.name + " joined the room",
+                        userData: attributes,
+                    };
+                    messages.value.push(systemMessage)
                 } catch (err) {}
             });
-            rtmChannel.on("MemberLeft", (member) => {
+            rtmChannel.on("MemberLeft", async (member) => {
                 console.warn("MemberLeft", member);
                 const indexToRemove = chatMembers.value.findIndex(
                     (element) => element["id"] === member
@@ -79,6 +85,15 @@ onMounted(async () => {
                 console.error("MemberLeft 2", indexToRemove, chatMembers.value);
                 emit("chatMembersUpdate", chatMembers);
                 getChannelCount();
+                const attributes = await rtmClient.getUserAttributes(
+                    member
+                );
+                const systemMessage = {
+                    id: null,
+                    text: attributes.name + " left the room",
+                    userData: attributes,
+                };
+                messages.value.push(systemMessage)
             });
         })
         .catch((err) => {
@@ -127,21 +142,22 @@ const getChannelCount = async () => {
 };
 
 const sendMessage = () => {
-    const userMessage = {
-        id: null,
-        text: message.value,
-        userData: userData,
-    };
     if (message.value === "") {
         return;
     }
+
+    const userMessage = {
+        id: Date.now() + Math.random().toString(6).substr(2, 9),
+        text: message.value,
+        userData: userData,
+    };
 
     if (rtmChannel) {
         rtmChannel
             .sendMessage({ text: JSON.stringify(userMessage) })
             .then(() => {
                 messages.value.push({
-                    id: Date.now() + Math.random().toString(6).substr(2, 9),
+                    id:  userMessage.id,
                     text: message.value,
                     userData: userData,
                 });
@@ -157,6 +173,64 @@ const sendPermissionResponse = (peerId, response) => {
     const systemMessage = {
         message: "permissionResponse",
         response: response,
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
+// used for inviting audience to stage
+const sendPermissionRequest = (peerId) => {
+    const systemMessage = {
+        message: "permissionRequest",
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
+const sendRemoveAudience = (peerId) => {
+    const systemMessage = {
+        message: "removeAudience",
+        userData: userData,
+    };
+
+    if (rtmClient) {
+        rtmClient
+            .sendMessageToPeer({ text: JSON.stringify(systemMessage) }, peerId)
+            .then(() => {})
+            .catch((err) => {
+                console.log(
+                    "AgoraRTM rtmClient sendMessageToPeer failure",
+                    err
+                );
+            });
+    }
+};
+
+const toggleMute = (peerId) => {
+    const systemMessage = {
+        message: "toggleMute",
         userData: userData,
     };
 
@@ -196,7 +270,7 @@ const sendDeleteMessage = (messageId) => {
     }
 };
 
-defineExpose({ sendPermissionResponse });
+defineExpose({ sendPermissionResponse, sendPermissionRequest, sendRemoveAudience, toggleMute });
 
 onBeforeUnmount(() => {
     rtmChannel.leave();

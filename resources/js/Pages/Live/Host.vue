@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, provide, ref } from "vue";
 import { usePage, Head, router } from "@inertiajs/vue3";
 import { TransitionRoot, TransitionChild } from "@headlessui/vue";
 import { Bars2Icon } from "@heroicons/vue/24/solid";
@@ -15,7 +15,9 @@ const page = usePage();
 const rightSidebar = ref("chat");
 const channelCount = ref(0);
 const channelViews = ref(0);
-const channelId = page.props.channelId;
+const channelId = ref(page.props.channelId);
+const audioOnly = page.props.audioOnly;
+const max_broadcasters = audioOnly ? 10 : 4
 const rtmChat = ref();
 const joinData = ref(null);
 const inviteToStage = ref(false);
@@ -24,6 +26,12 @@ const pageLoading = ref(true);
 const broadcasterUIDs = ref([]);
 const broadcasters = ref([]);
 const viewers = ref([]);
+const notificationData = ref({
+    message: "You Got This!",
+    description: "You are now live!",
+});
+const notificationType = ref("error");
+const notificationOpen = ref(false);
 
 const rightSidebarTop = [
     {
@@ -57,7 +65,20 @@ const sysMessage = (json, peerId) => {
     }
 };
 
+const closeNotification = () => {
+    notificationOpen.value = false;
+};
+
 const approveJoinRequest = (peerId) => {
+    if (broadcasters.value.length + 1>= max_broadcasters) {
+        notificationData.value = {
+            message: "Too Many Broadcasters",
+            description: "Maximum number of broadcasters reached",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        return;
+    }
     rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
     inviteToStage.value = false;
 };
@@ -66,6 +87,64 @@ const ignoreJoinRequest = (peerId) => {
     rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
     inviteToStage.value = false;
 };
+
+const inviteAudience = async (user) => {
+    if (broadcasters.value.length + 1>= max_broadcasters) {
+        notificationData.value = {
+            message: "Too Many Broadcasters",
+            description: "Maximum number of broadcasters reached",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        return;
+    }
+    if (user != null) {
+        rtmChat.value.$.exposed.sendPermissionRequest(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+}
+provide("inviteAudience", inviteAudience);
+
+const removeAudience = async (user) => {
+    if (user != null) {
+        rtmChat.value.$.exposed.sendRemoveAudience(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+}
+provide("removeAudience", removeAudience);
+
+const toggleMuteUser = async (user) => {
+    if (user != null) {
+        rtmChat.value.$.exposed.toggleMute(user.id);
+    } else {
+        alert("Audience member not found");
+    }
+};
+provide("toggleMuteUser", toggleMuteUser);
+
+const kickBanUser = async (user, timeInSeconds) => {
+    try {
+        const response = await axios
+            .post("/live/kick-user", {
+                userId: user.id,
+                channelId: channelId,
+                appId: page.props.appId,
+                timeInSeconds: timeInSeconds,
+            })
+            .then((response) => {
+                console.log(response.data);
+            });
+
+        // Now you can handle the response as needed
+    } catch (error) {
+        // Handle errors here
+        console.error("Error calling kick-user endpoint:", error);
+    }
+};
+provide("kickBanUser", kickBanUser);
+
 
 const scrollToBottom = () => {
     const container = document.getElementById("messagesContainer");
@@ -90,11 +169,11 @@ const updateChannelCount = (count) => {
 
 const updateChatMembers = (chatList) => {
     viewers.value = [...chatList.value];
-    copyBroadcasters();
 };
 
 const broadcastersUpdate = (blist) => {
     broadcasterUIDs.value = [...blist.value];
+    console.log("broadcaster updated", broadcasterUIDs.value.length);
     copyBroadcasters();
 };
 
@@ -110,9 +189,9 @@ const copyBroadcasters = () => {
 };
 
 const deleteStream = () => {
-    router.delete("/live", {
+    router.delete("/live.destroy", {
         data: {
-            uuid: page.props.live.uuid,
+            uuid: channelId,
         },
     });
 };
@@ -221,6 +300,12 @@ const tipList = [
         :show="inviteToStage"
         @approve="approveJoinRequest"
         @ignore="ignoreJoinRequest"
+    />
+    <Notification
+        :type="notificationType"
+        :data="notificationData"
+        :show="notificationOpen"
+        @close="closeNotification"
     />
     <!--suppress HtmlRequiredTitleElement -->
     <Head title="Live" />

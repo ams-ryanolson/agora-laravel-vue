@@ -1,9 +1,12 @@
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
+// TODO : pass in host id so the options on an user are not shown for the host
+// TODO: add list of broadcasters with their mute states to toggle mute/unmute in the bottoms
 const props = defineProps({
     user: Object,
+    isBroadcaster: Boolean,
 });
 
 const userItemMenu = ref(false);
@@ -11,6 +14,12 @@ const userItemMenu = ref(false);
 const closeUserItemMenu = () => {
     userItemMenu.value = !userItemMenu.value;
 };
+
+const inviteAudience = inject("inviteAudience");
+const removeAudience = inject("removeAudience");
+const kickBanUser = inject("kickBanUser");
+const toggleMuteUser = inject("toggleMuteUser");
+
 </script>
 
 <template>
@@ -40,26 +49,38 @@ const closeUserItemMenu = () => {
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="kickBanUser(user, 0)"
                     >
-                        Kick
+                        Kick User
+                    </a>
+                    <!-- Set as 36 seconds for testing Ban, Ban requires a timer and is associated with a channelId which in our case is the userId of the host (up to you if you want to append a random suffix to have an unique channelId so this can be session based), so I suggest setting it to 1 hr (3600)-->
+                    <a
+                        href="#"
+                        class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="kickBanUser(user, 36)"
+                    >
+                        Ban User
                     </a>
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="toggleMuteUser(user)"
                     >
-                        Ban
+                        Toggle Mute
                     </a>
-                    <a
+                    <a v-if="!isBroadcaster"
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
+                        @click="inviteAudience(user)"
                     >
-                        Mute
+                        Invite to Stage
                     </a>
-                    <a
+                    <a v-else
                         href="#"
                         class="block px-4 py-2 text-sm text-gray-300 hover:bg-sky-900 hover:text-white"
-                    >
-                        Invite
+                        @click="removeAudience(user)"
+                        >
+                        Remove from Stage
                     </a>
                 </div>
             </div>

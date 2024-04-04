@@ -16,6 +16,8 @@ use App\Http\Controllers\LiveController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::post('/live/create-token', [LiveController::class, 'createMediaGatewayToken']);
+Route::post('/live/kick-user', [LiveController::class, 'kickBanUser']);
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

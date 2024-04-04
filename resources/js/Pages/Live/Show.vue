@@ -1,11 +1,12 @@
 <script setup>
-import { usePage, Link, Head } from "@inertiajs/vue3";
-import { onMounted, onUnmounted, onBeforeUnmount, ref } from "vue";
+import { usePage, Link, Head, router } from "@inertiajs/vue3";
+import { onMounted, onUnmounted, onBeforeUnmount, ref, provide } from "vue";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import ViewerChat from "./Components/ViewerChat.vue";
 import TipModal from "./Components/TipModal.vue";
 import ChooseDevices from "./Components/Host/ChooseDevices.vue";
 import Notification from "@/Pages/Components/Notification.vue";
+import InviteRequest from "../Components/InviteRequest.vue";
 
 import {
     CogIcon,
@@ -26,9 +27,12 @@ const host_uid = ref(null);
 const channelId = ref(page.props.channelId);
 const appId = ref(page.props.appId);
 const token = ref(page.props.rtcToken);
+const audioOnly = page.props.audioOnly;
 const localTracks = ref([]);
 const remoteUsers = ref({});
 const isJoined = ref(false);
+const inviteData = ref(null);
+const invitedToStage = ref(false);
 const openTipModal = ref(false);
 const openChooseDevices = ref(false);
 const isVideoMuted = ref(false);
@@ -50,6 +54,8 @@ const notificationOpen = ref(false);
 const join = async () => {
     client.on("user-published", handleUserPublished);
     client.on("user-unpublished", handleUserUnpublished);
+    client.on("connection-state-change", handleConnectionStateChange);
+    client.on("user-left", handleUserLeft);
     await client.join(
         appId.value,
         channelId.value,
@@ -59,8 +65,12 @@ const join = async () => {
 };
 
 const leave = async () => {
+    if (isBroadcasting.value == true) {
+       await endLive();
+    }
     client.leave();
     isBroadcasting.value = false;
+    router.visit("/live");
 };
 
 //leave
@@ -73,11 +83,20 @@ const subscribe = async (user, mediaType) => {
 
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
-    if (mediaType === "video") {
+    if (!audioOnly && mediaType === "video") {
         user.videoTrack.play(`remote-player`);
     }
     if (mediaType === "audio") {
         user.audioTrack.play();
+    }
+};
+
+const handleUserLeft = (user, reason) => {
+    console.log('"User Left" event for remote users is triggered', user, reason);
+    console.log(host_uid, user.uid, reason)
+    if (host_uid.value == user.uid && reason === "Quit") {
+        console.log("Host quit");
+        leave();
     }
 };
 
@@ -86,7 +105,40 @@ const handleUserPublished = (user, mediaType) => {
 };
 
 const handleUserUnpublished = (user, mediaType) => {
-    console.log('"User Unpublished" event for remote users is triggered');
+    console.log('"User Unpublished" event for remote users is triggered', user, mediaType);
+};
+
+const handleConnectionStateChange = (newState, currentState, reason) => {
+    console.log(
+        "Connection state changed to " +
+            newState +
+            " from " +
+            currentState +
+            " reason: " +
+            reason
+    );
+
+    // since kick and ban is the same API but with different timeInSeconds parameter, it's difficult to differentiate in messaging
+    // what you could probably do is create a state in a parent, and update that state on the Kick or Ban button click to display something different here
+    if (reason == "UID_BANNED") {
+        notificationData.value = {
+            message: "You have been removed from the room.",
+            description: "Taking you back to live streams...",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+
+        setTimeout(() => {
+            router.visit("/live");
+        }, 5000);
+    } else if (newState === "DISCONNECTED") {
+        notificationData.value = {
+            message: "You have been disconnected from the room.",
+            description: "Please refresh or rejoin.",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+    }
 };
 
 const closeChooseDevices = () => {
@@ -148,7 +200,9 @@ const unmuteAudio = async () => {
 };
 
 const playLocalTrack = async () => {
-    await localTracks.value[1].play("remote-player");
+    if (!audioOnly) {
+        await localTracks.value[1].play("remote-player");
+    }
 };
 
 const stopLocalTrack = async () => {
@@ -158,7 +212,14 @@ const stopLocalTrack = async () => {
 const rtmChat = ref();
 
 const sysMessage = (json, peerId) => {
-    if (json.message == "permissionResponse") {
+    if (json.message == "permissionRequest") {
+        inviteData.value = {
+            peerId: peerId,
+            message: "Permission Request",
+            description: json.userData.name + " invites you to go live.",
+        };
+        invitedToStage.value = true;
+    } else if (json.message == "permissionResponse") {
         if (json.response == "OK") {
             prepareGoLive();
         } else {
@@ -169,7 +230,32 @@ const sysMessage = (json, peerId) => {
             notificationType.value = "error";
             notificationOpen.value = true;
         }
+    } else if (json.message == "removeAudience") {
+        notificationData.value = {
+            message: "You have been removed from the stage.",
+            description: "The host removed you from the stage.",
+        };
+        notificationType.value = "info";
+        notificationOpen.value = true;
+        endLive();
+    } else if ((json.message = "toggleMute")) {
+        if (isAudioMuted.value == false) {
+            muteAudio();
+        } else {
+            unmuteAudio();
+        }
     }
+};
+
+const approveInviteRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "OK");
+    prepareGoLive();
+    invitedToStage.value = false;
+};
+
+const rejectInviteRequest = (peerId) => {
+    rtmChat.value.$.exposed.sendPermissionResponse(peerId, "FAIL");
+    invitedToStage.value = false;
 };
 
 const closeNotification = () => {
@@ -259,6 +345,12 @@ const tipOptions = [
 
 <template>
     <!--suppress HtmlRequiredTitleElement -->
+    <InviteRequest
+        :data="inviteData"
+        :show="invitedToStage"
+        @approve="approveInviteRequest"
+        @ignore="rejectInviteRequest"
+    />
     <Head title="Live" />
 
     <Notification
@@ -290,7 +382,7 @@ const tipOptions = [
                 <div
                     id="remote-player"
                     style="display: contents"
-                    class="w-full h-full rounded-lg"
+                    class="w-full aspect-video rounded-lg"
                 ></div>
 
                 <div
@@ -298,7 +390,7 @@ const tipOptions = [
                     class="w-full h-12 flex flex-row justify-between items-center absolute bottom-0 rounded-b-lg z-2"
                 >
                     <div class="flex flex-row gap-6 px-4 items-center">
-                        <div>
+                        <div v-if="!audioOnly">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 576 512"
